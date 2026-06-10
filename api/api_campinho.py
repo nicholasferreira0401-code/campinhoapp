@@ -5,7 +5,28 @@ import os
 app = Flask(__name__)
 
 csv_jogadores = "jogadores.csv"
+csv_partidas = "partidas.csv"
 
+
+# Criar CSVs
+if not os.path.exists(csv_jogadores):
+    pd.DataFrame(columns=[
+        "ID_jogador",
+        "jogador",
+        "time",
+        "gols",
+        "assistencias",
+        "total"
+    ]).to_csv(csv_jogadores, index=False)
+
+
+if not os.path.exists(csv_partidas):
+    pd.DataFrame(columns=[
+        "ID",
+        "data",
+        "time1_placar",
+        "time2_placar"
+    ]).to_csv(csv_partidas, index=False)
 
 
 @app.route("/api/add_jogador", methods=["GET"])
@@ -14,27 +35,23 @@ def adicionar_jogador():
     nome = request.args.get("jogador")
     time = request.args.get("time")
 
-    # Se não vier, assume 0
-    gols = int(request.args.get("gols", 0))
-    assistencias = int(request.args.get("assistencias", 0))
+    gols = request.args.get("gols", type=int, default=0)
+    assistencias = request.args.get(
+        "assistencias",
+        type=int,
+        default=0
+    )
+
+    if not nome:
+        return jsonify({"erro": "Informe jogador"}), 400
+
+    if not time:
+        return jsonify({"erro": "Informe time"}), 400
 
     total = gols + assistencias
 
-    # Validações
-    if not nome:
-        return jsonify({
-            "erro": "Informe o parâmetro jogador"
-        }), 400
-
-    if not time:
-        return jsonify({
-            "erro": "Informe o time do jogador"
-        }), 400
-
-    # Ler CSV
     df = pd.read_csv(csv_jogadores)
 
-    # Evitar duplicados
     if not df.empty:
 
         existe = (
@@ -50,7 +67,6 @@ def adicionar_jogador():
                 "erro": "Jogador já existe"
             }), 400
 
-    # Gerar ID
     novo_id = 1 if df.empty else int(df["ID_jogador"].max()) + 1
 
     novo = pd.DataFrame([{
@@ -64,17 +80,64 @@ def adicionar_jogador():
 
     df = pd.concat([df, novo], ignore_index=True)
 
-    # Salvar
     df.to_csv(csv_jogadores, index=False)
 
+    return jsonify(novo.iloc[0].to_dict())
+
+
+@app.route("/api/partidas", methods=["GET"])
+def add_partida():
+
+    data = request.args.get("data")
+
+    time1 = request.args.get(
+        "time1_placar",
+        type=int
+    )
+
+    time2 = request.args.get(
+        "time2_placar",
+        type=int
+    )
+
+    if not data:
+        return jsonify({
+            "erro": "Informe data"
+        }), 400
+
+    if time1 is None or time2 is None:
+        return jsonify({
+            "erro": "Informe os dois placares"
+        }), 400
+
+    df = pd.read_csv(csv_partidas)
+
+    data = pd.to_datetime(
+        data,
+        errors="coerce"
+    )
+
+    if pd.isna(data):
+        return jsonify({
+            "erro": "Data inválida"
+        }), 400
+
+    novo_id = 1 if df.empty else int(df["ID"].max()) + 1
+
+    nova = pd.DataFrame([{
+        "ID": novo_id,
+        "data": data.strftime("%d-%m-%y"),
+        "time1_placar": time1,
+        "time2_placar": time2
+    }])
+
+    df = pd.concat([df, nova], ignore_index=True)
+
+    df.to_csv(csv_partidas, index=False)
+
     return jsonify({
-        "mensagem": "Jogador adicionado",
-        "ID_jogador": novo_id,
-        "jogador": nome,
-        "time": time,
-        "gols": gols,
-        "assistencias": assistencias,
-        "total": total
+        "mensagem": "Partida adicionada",
+        "ID": novo_id
     })
 
 
