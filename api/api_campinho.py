@@ -4,30 +4,39 @@ import os
 
 app = Flask(__name__)
 
-ARQUIVO = "jogadores.csv"
+csv_jogadores = "jogadores.csv"
 
-
-# Criar arquivo se não existir
-if not os.path.exists(ARQUIVO):
-    df = pd.DataFrame(columns=["ID_jogador", "jogador"])
-    df.to_csv(ARQUIVO, index=False)
 
 
 @app.route("/api/add_jogador", methods=["GET"])
 def adicionar_jogador():
 
     nome = request.args.get("jogador")
+    time = request.args.get("time")
 
+    # Se não vier, assume 0
+    gols = int(request.args.get("gols", 0))
+    assistencias = int(request.args.get("assistencias", 0))
+
+    total = gols + assistencias
+
+    # Validações
     if not nome:
         return jsonify({
             "erro": "Informe o parâmetro jogador"
         }), 400
 
+    if not time:
+        return jsonify({
+            "erro": "Informe o time do jogador"
+        }), 400
+
     # Ler CSV
-    df = pd.read_csv(ARQUIVO)
+    df = pd.read_csv(csv_jogadores)
 
     # Evitar duplicados
     if not df.empty:
+
         existe = (
             df["jogador"]
             .astype(str)
@@ -38,26 +47,34 @@ def adicionar_jogador():
 
         if existe:
             return jsonify({
-                "mensagem": "Jogador já existe"
+                "erro": "Jogador já existe"
             }), 400
 
     # Gerar ID
-    novo_id = 1 if df.empty else df["ID_jogador"].max() + 1
+    novo_id = 1 if df.empty else int(df["ID_jogador"].max()) + 1
 
     novo = pd.DataFrame([{
         "ID_jogador": novo_id,
-        "jogador": nome
+        "jogador": nome,
+        "time": time,
+        "gols": gols,
+        "assistencias": assistencias,
+        "total": total
     }])
 
     df = pd.concat([df, novo], ignore_index=True)
 
     # Salvar
-    df.to_csv(ARQUIVO, index=False)
+    df.to_csv(csv_jogadores, index=False)
 
     return jsonify({
         "mensagem": "Jogador adicionado",
-        "ID_jogador": int(novo_id),
-        "jogador": nome
+        "ID_jogador": novo_id,
+        "jogador": nome,
+        "time": time,
+        "gols": gols,
+        "assistencias": assistencias,
+        "total": total
     })
 
 
