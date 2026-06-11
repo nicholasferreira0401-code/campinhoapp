@@ -1,7 +1,15 @@
-import GraficoGols
-from "../components/GraficoGols"
+import GraficoGols from "../components/GraficoGols"
 
-import { useEffect, useState } from "react"
+import {
+useEffect,
+useState
+}
+from "react"
+
+import {
+Link
+}
+from "react-router-dom"
 
 export default function Dashboard(){
 
@@ -13,24 +21,45 @@ useEffect(()=>{
 fetch(
 "http://127.0.0.1:5000/api/partidas_df"
 )
-.then(r=>r.json())
-.then(setPartidas)
+.then(
+r=>r.json()
+)
+.then(
+setPartidas
+)
 
 fetch(
 "http://127.0.0.1:5000/api/jogadores_df"
 )
-.then(r=>r.json())
-.then(setJogadores)
+.then(
+r=>r.json()
+)
+.then(
+setJogadores
+)
 
 },[])
 
-const totalGols =
+const totalGols=
+
 partidas.reduce(
+
 (acc,p)=>
+
 acc+
-(p.time1_placar||0)+
-(p.time2_placar||0),
+
+Number(
+p.time1_placar||0
+)
+
++
+
+Number(
+p.time2_placar||0
+),
+
 0
+
 )
 
 return(
@@ -77,10 +106,40 @@ Gols
 {totalGols}
 </h2>
 
+</div>
+
+</div>
+
+<br/>
+
 <GraficoGols
 partidas={partidas}
 />
-</div>
+
+<br/>
+
+<div
+style={{
+display:"flex",
+gap:"20px"
+}}
+>
+
+<Link
+to="/add-jogador"
+>
+
+➕ Adicionar Jogador
+
+</Link>
+
+<Link
+to="/add-partida"
+>
+
+⚽ Adicionar Partida
+
+</Link>
 
 </div>
 

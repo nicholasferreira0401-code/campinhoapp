@@ -3,7 +3,7 @@ ID,data,time1_placar,time2_placar,vencedor,gol_time1,gol_time2,assistencia_time1
 2,06/11/2026,1,2,time2,Ratata,Tadala,,Tadala,,
 3,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
 4,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
-5,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
+5,06/11/2026,1,1,time2,Ratata,Tadala,Volvo,Kaiozinho,,
 6,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
 7,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
 8,06/11/2026,1,2,time2,Ratata,Tadala,Volvo,Kaiozinho,,
@@ -18,3 +18,5 @@ ID,data,time1_placar,time2_placar,vencedor,gol_time1,gol_time2,assistencia_time1
 17,06/11/2026,1,2,time2,Ratata,Tadala,,Kaiozinho,JV,Gigi
 18,06/11/2026,1,2,time2,Ratata,Tadala,,Kaiozinho,JV,Gigi
 19,06/11/2026,1,2,time2,Ratata,Tadala,,Kaiozinho,JV,Gigi
+20,17/06/2026,2,5,time2,,,,,,
+21,12/06/2026,0,125,time2,,,,,,

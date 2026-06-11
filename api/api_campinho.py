@@ -339,10 +339,16 @@ def add_partida():
         "assistente_time2"
     )
     defesa1 = request.args.get(
-        "defesa_time1")
-    
+    "defesa_time1",
+    type=int,
+    default=0
+    )
+
     defesa2 = request.args.get(
-        "defesa_time2")
+    "defesa_time2",
+    type=int,
+    default=0
+    )
 
     if not data:
 

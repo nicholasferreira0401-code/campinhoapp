@@ -1,0 +1,51 @@
+.navbar{
+
+background:#0f1e3a;
+
+padding:20px 40px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+box-shadow:0 5px 20px rgba(0,0,0,.2);
+
+}
+
+.navbar h2{
+
+margin:0;
+
+color:white;
+
+}
+
+.links{
+
+display:flex;
+
+gap:20px;
+
+}
+
+.links a{
+
+color:white;
+
+text-decoration:none;
+
+padding:10px;
+
+border-radius:8px;
+
+transition:.2s;
+
+}
+
+.links a:hover{
+
+background:#2563eb;
+
+}

@@ -41,11 +41,9 @@ i+1
 ),
 
 datasets:[
-
 {
 
-label:
-"Gols",
+label:"Gols",
 
 data:
 
@@ -61,19 +59,53 @@ Number(
 p.time2_placar
 )
 
-)
+),
+
+backgroundColor:
+
+[
+"#3B82F6"
+],
+
+borderColor:
+
+[
+"#60A5FA"
+],
+
+borderWidth:2,
+
+borderRadius:8
 
 }
-
 ]
 
 }
 
 return(
 
+<div
+style={{
+width:"700px",
+height:"350px",
+margin:"auto"
+}}
+>
+
 <Bar
 data={dados}
-/>
+
+options={{
+
+responsive:true,
+
+maintainAspectRatio:false
+
+}}
+
+ />
+
+</div>
 
 )
 
