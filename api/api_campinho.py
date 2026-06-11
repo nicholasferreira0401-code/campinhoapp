@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
 
+CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 csv_jogadores = os.path.join(BASE_DIR, "jogadores.csv")
@@ -535,11 +537,6 @@ def add_partida():
         "defesa2": defesa2
     })
 
-@app.route("/api/jogadores_df", methods=["GET"])
-def jogadores_df():
-    return jsonify(
-        pd.read_csv(csv_jogadores).to_dict(orient="records")
-    )
 
 @app.route("/api/goleiros_df", methods=["GET"])
 def goleiros_df():
@@ -547,12 +544,48 @@ def goleiros_df():
         pd.read_csv(csv_goleiros).to_dict(orient="records")
     )
 
-@app.route('/api/partidas_df', methods=["GET"])
+
+@app.route("/api/partidas_df")
 def partidas_df():
-    return jsonify(
-        pd.read_csv(csv_partidas).to_dict(orient="records")
+
+    df = pd.read_csv(csv_partidas)
+
+    # transformar NaN em None
+    df = (
+        df
+        .astype(object)
+        .where(
+            pd.notnull(df),
+            None
+        )
     )
 
+    resultado = (
+        df
+        .to_dict(
+            orient="records"
+        )
+    )
 
+    return jsonify(resultado)
+@app.route("/api/jogadores_df")
+def jogadores_df():
+
+    df = pd.read_csv(csv_jogadores)
+
+    # converter NaN → null
+    df = (
+        df
+        .where(
+            pd.notnull(df),
+            None
+        )
+    )
+
+    return jsonify(
+        df.to_dict(
+            orient="records"
+        )
+    )
 if __name__ == "__main__":
     app.run(debug=True)
