@@ -70,3 +70,9 @@
 .sidebar-footer span {
   display: block;
 }
+
+/* Estilo para o link da página atual */
+.nav-links a.active {
+  background: #1d4ed8; /* Cor azul de destaque */
+  color: white;
+}

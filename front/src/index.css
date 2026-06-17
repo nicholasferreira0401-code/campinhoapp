@@ -15,8 +15,9 @@ body {
 
 .lista {
     display: grid;
+    color: white;
     width: 100%;
-    grid-template-columns: repeat(4, minmax(360px, 1fr));
+    grid-template-columns: repeat(4, minmax(250px, 1fr));
     gap: 20px;
     padding: 40px;
 }
@@ -34,66 +35,46 @@ body {
 }
 
 .card {
-
     background: #12203c;
-
     padding: 20px;
-
     border-radius: 12px;
-
 }
 
 .card:hover {
-
-    transform:
-        translateY(-4px);
-
+    transform: translateY(-4px);
 }
 
 .tabela {
-
     width: 95%;
-
     margin: auto;
-
-    border-collapse:
-        collapse;
-
+    border-collapse: collapse;
     background: #15223d;
-
 }
 
 .tabela th {
-
     background: #1d3f72;
-
     padding: 16px;
-
+    color: #94a3b8; /* Um tom cinza claro elegante para os cabeçalhos */
 }
 
-.tabela td {
-
+/* CORRIGIDO: Forçando cor clara para os textos e links nas células da listagem */
+.tabela td,
+.tabela td a {
     padding: 14px;
-
     text-align: center;
-
-    border-bottom:
-
-        1px solid #30466e;
-
+    color: #f8fafc !important; 
+    border-bottom: 1px solid #30466e;
+    text-decoration: none;
 }
 
 .tabela tr:hover {
-
     background: #20385d;
-
 }
 
-@view-transition{
+@view-transition {
     navigation: auto;
 }
 
-::view-transition(:root){
+::view-transition(:root) {
     animation-duration: 1s;
-   
 }

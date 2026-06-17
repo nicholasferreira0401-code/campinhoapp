@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import "./App.css"
 
 import Navbar from "./components/Navbar"
-import "./App.css"
 
 import Dashboard from "./pages/Dashboard"
 import Jogadores from "./pages/Jogadores"

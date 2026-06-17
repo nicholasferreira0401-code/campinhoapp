@@ -1,107 +1,69 @@
-import "../styles/formulario.css"
-import { useState } from "react"
+import { useState } from "react";
+import "../styles/formulario.css"; // Importando o CSS que você enviou
 
-export default function AddJogador(){
-  const [jogador, setJogador] = useState("")
-  const [time, setTime] = useState("")
-  const [msg, setMsg] = useState("")
-  const [msgType, setMsgType] = useState("")
+export default function AddJogador() {
+  const [jogador, setJogador] = useState("");
+  const [time, setTime] = useState("");
+  const [mensagem, setMensagem] = useState({ texto: "", tipo: "" });
 
-async function enviar(e){
-  e.preventDefault()
+  async function lidarComEnvio(e) {
+    e.preventDefault();
 
-  if (!jogador.trim() || !time.trim()) {
-    setMsg("Preencha nome e time.")
-    setMsgType("error")
-    return
-  }
-
-  try {
-    const resposta = await fetch(
-      `http://127.0.0.1:5000/api/add_jogador?${new URLSearchParams({ jogador, time })}`
-    )
-    const dados = await resposta.json()
-
-    if (resposta.ok) {
-      setMsg(dados.mensagem || "Jogador salvo com sucesso.")
-      setMsgType("success")
-      setJogador("")
-      setTime("")
-    } else {
-      setMsg(dados.erro || dados.mensagem || "Erro ao salvar jogador.")
-      setMsgType("error")
+    if (!jogador || !time) {
+      setMensagem({ texto: "Preencha todos os campos!", tipo: "error" });
+      return;
     }
-  } catch (erro) {
-    setMsg(erro.message || "Falha na conexão com a API.")
-    setMsgType("error")
+
+    try {
+      const resposta = await fetch("http://127.0.0.1:5000/api/add_jogador", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jogador, time }),
+      });
+
+      if (resposta.ok) {
+        setMensagem({ texto: "Jogador cadastrado com sucesso! ⚽", tipo: "success" });
+        setJogador("");
+        setTime("");
+      } else {
+        setMensagem({ texto: "Erro ao cadastrar o jogador.", tipo: "error" });
+      }
+    } catch (erro) {
+      setMensagem({ texto: "Erro na conexão com o servidor.", tipo: "error" });
+    }
   }
-}
 
-return(
+  return (
+    <div className="container-form">
+      <div className="card-form">
+        <h1>Novo Jogador</h1>
+        
+        <form className="form" onSubmit={lidarComEnvio}>
+          <input
+            type="text"
+            placeholder="Nome do jogador"
+            value={jogador}
+            onChange={(e) => setJogador(e.target.value)}
+          />
+          
+          <input
+            type="text"
+            placeholder="Time do jogador"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+          />
 
-<div
-className="container-form"
->
+          <button type="submit" className="botao">
+            Salvar Jogador
+          </button>
+        </form>
 
-<div
-className="card-form"
->
-
-<h1>
-
-Adicionar Jogador
-
-</h1>
-
-<form
-className="form"
-onSubmit={enviar}
->
-
-<label>
-
-Nome
-
-</label>
-
-<input
-  value={jogador}
-  onChange={e => setJogador(e.target.value)}
-  required
-/>
-
-<label>
-
-Time
-
-</label>
-
-<input
-  value={time}
-  onChange={e => setTime(e.target.value)}
-  required
-/>
-
-<button
-className="botao"
->
-
-Salvar
-
-</button>
-
-</form>
-
-{msg && (
-  <div className={`msg ${msgType}`}>
-    {msg}
-  </div>
-)}
-
-</div>
-
-</div>
-
-)
-
+        {mensagem.texto && (
+          <div className={`msg ${mensagem.tipo}`}>
+            {mensagem.texto}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
