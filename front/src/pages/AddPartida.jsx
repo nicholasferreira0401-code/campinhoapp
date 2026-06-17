@@ -17,57 +17,54 @@ const [assist2,setAssist2]=useState("")
 const [defesa1,setDefesa1]=useState("")
 const [defesa2,setDefesa2]=useState("")
 
-const [msg,setMsg]=useState("")
+const [msg, setMsg] = useState("")
+const [msgType, setMsgType] = useState("")
 
-async function enviar(e){
+async function enviar(e) {
+  e.preventDefault()
 
-e.preventDefault()
+  if (!data || placar1 === "" || placar2 === "") {
+    setMsg("Preencha data e placares antes de salvar.")
+    setMsgType("error")
+    return
+  }
 
-const resposta =
-await fetch(
+  const params = new URLSearchParams({
+    data,
+    time1_placar: placar1,
+    time2_placar: placar2,
+    gol_time1: gol1,
+    gol_time2: gol2,
+    assistente_time1: assist1,
+    assistente_time2: assist2,
+    defesa_time1: defesa1 || 0,
+    defesa_time2: defesa2 || 0,
+  })
 
-"http://127.0.0.1:5000/api/partidas?"
+  try {
+    const resposta = await fetch(`http://127.0.0.1:5000/api/partidas?${params}`)
+    const dados = await resposta.json()
 
-+
-
-new URLSearchParams({
-
-data,
-
-time1_placar:placar1,
-
-time2_placar:placar2,
-
-gol_time1:gol1,
-
-gol_time2:gol2,
-
-assistente_time1:assist1,
-
-assistente_time2:assist2,
-
-defesa_time1:defesa1,
-
-defesa_time2:defesa2
-
-})
-
-)
-
-if(resposta.ok){
-
-setMsg(
-"✅ Partida cadastrada"
-)
-
-}else{
-
-setMsg(
-"❌ Erro ao salvar"
-)
-
-}
-
+    if (resposta.ok) {
+      setMsg("✅ Partida cadastrada com sucesso.")
+      setMsgType("success")
+      setData("")
+      setPlacar1("")
+      setPlacar2("")
+      setGol1("")
+      setGol2("")
+      setAssist1("")
+      setAssist2("")
+      setDefesa1("")
+      setDefesa2("")
+    } else {
+      setMsg(`❌ ${dados.erro || dados.mensagem || "Erro ao salvar partida."}`)
+      setMsgType("error")
+    }
+  } catch (erro) {
+    setMsg(`❌ ${erro.message || "Falha ao conectar com a API."}`)
+    setMsgType("error")
+  }
 }
 
 return(
@@ -90,107 +87,80 @@ onSubmit={enviar}
 <label>Data</label>
 
 <input
-type="date"
-onChange={
-e=>
-setData(
-e.target.value
-)
-}
+  type="date"
+  value={data}
+  onChange={e => setData(e.target.value)}
+  required
 />
 
 <label>Placar Time 1</label>
 
 <input
-type="number"
-onChange={
-e=>
-setPlacar1(
-e.target.value
-)
-}
+  type="number"
+  value={placar1}
+  min="0"
+  onChange={e => setPlacar1(e.target.value)}
+  required
 />
 
 <label>Placar Time 2</label>
 
 <input
-type="number"
-onChange={
-e=>
-setPlacar2(
-e.target.value
-)
-}
+  type="number"
+  value={placar2}
+  min="0"
+  onChange={e => setPlacar2(e.target.value)}
+  required
 />
 
-<label>Gol Time 1</label>
+<label>Gols Time 1</label>
 
 <input
-placeholder="Nome jogador"
-onChange={
-e=>
-setGol1(
-e.target.value
-)
-}
+  value={gol1}
+  placeholder="Ex: Ratata, Ratata, Kaiozinho"
+  onChange={e => setGol1(e.target.value)}
 />
 
-<label>Gol Time 2</label>
+<label>Gols Time 2</label>
 
 <input
-placeholder="Nome jogador"
-onChange={
-e=>
-setGol2(
-e.target.value
-)
-}
+  value={gol2}
+  placeholder="Ex: Tadala, JV, JV"
+  onChange={e => setGol2(e.target.value)}
 />
 
-<label>Assistente Time 1</label>
+<label>Assistências Time 1</label>
 
 <input
-onChange={
-e=>
-setAssist1(
-e.target.value
-)
-}
+  value={assist1}
+  placeholder="Ex: Volvo, Ratata"
+  onChange={e => setAssist1(e.target.value)}
 />
 
-<label>Assistente Time 2</label>
+<label>Assistências Time 2</label>
 
 <input
-onChange={
-e=>
-setAssist2(
-e.target.value
-)
-}
+  value={assist2}
+  placeholder="Ex: Tadala, JV"
+  onChange={e => setAssist2(e.target.value)}
 />
 
 <label>Defesas Goleiro Time 1</label>
 
 <input
-type="number"
-onChange={
-e=>
-setDefesa1(
-e.target.value
-)
-}
+  type="number"
+  value={defesa1}
+  min="0"
+  onChange={e => setDefesa1(e.target.value)}
 />
 
 <label>Defesas Goleiro Time 2</label>
 
 <input
-type="number"
-onChange={
-e=>
-setDefesa2(
-e.target.value
-)
-}
+  type="number"
+  value={defesa2}
+  min="0"
+  onChange={e => setDefesa2(e.target.value)}
 />
 
 <button
@@ -203,10 +173,8 @@ Salvar Partida
 
 </form>
 
-<div className="msg">
-
-{msg}
-
+<div className={`msg ${msgType}`}>
+  {msg}
 </div>
 
 </div>

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import os
+import re
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -112,6 +113,15 @@ def atualizar_jogador(df, nome, campo, time):
         df.loc[len(df)] = novo
 
     return df
+
+
+def parse_nomes(valor):
+    if not valor:
+        return []
+
+    texto = str(valor)
+    partes = [p.strip() for p in re.split(r"[;,\n]+", texto) if p.strip()]
+    return partes
 
 
 # =====================
@@ -338,6 +348,14 @@ def add_partida():
     assist2 = request.args.get(
         "assistente_time2"
     )
+
+    def extract_players(value):
+        return parse_nomes(value)
+
+    scorers_time1 = extract_players(jogador1)
+    scorers_time2 = extract_players(jogador2)
+    assistentes_time1 = extract_players(assist1)
+    assistentes_time2 = extract_players(assist2)
     defesa1 = request.args.get(
     "defesa_time1",
     type=int,
@@ -424,33 +442,37 @@ def add_partida():
     )
 
     # atualizar automaticamente
-    jogadores = atualizar_jogador(
-        jogadores,
-        jogador1,
-        "gols",
-        "time1"
-    )
+    for scorer in scorers_time1:
+        jogadores = atualizar_jogador(
+            jogadores,
+            scorer,
+            "gols",
+            "time1"
+        )
 
-    jogadores = atualizar_jogador(
-        jogadores,
-        jogador2,
-        "gols",
-        "time2"
-    )
+    for scorer in scorers_time2:
+        jogadores = atualizar_jogador(
+            jogadores,
+            scorer,
+            "gols",
+            "time2"
+        )
 
-    jogadores = atualizar_jogador(
-        jogadores,
-        assist1,
-        "assistencias",
-        "time1"
-    )
+    for assistente in assistentes_time1:
+        jogadores = atualizar_jogador(
+            jogadores,
+            assistente,
+            "assistencias",
+            "time1"
+        )
 
-    jogadores = atualizar_jogador(
-        jogadores,
-        assist2,
-        "assistencias",
-        "time2"
-    )
+    for assistente in assistentes_time2:
+        jogadores = atualizar_jogador(
+            jogadores,
+            assistente,
+            "assistencias",
+            "time2"
+        )
 
     # atualizar goleiros automaticamente
     goleiros["defesas"] = (

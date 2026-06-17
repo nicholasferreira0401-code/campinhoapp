@@ -1,52 +1,40 @@
 import "../styles/formulario.css"
-import {
-useState
-}
-from "react"
+import { useState } from "react"
 
 export default function AddJogador(){
-
-const[
-jogador,
-setJogador
-]=useState("")
-
-const[
-time,
-setTime
-]=useState("")
-
-const[
-msg,
-setMsg
-]=useState("")
+  const [jogador, setJogador] = useState("")
+  const [time, setTime] = useState("")
+  const [msg, setMsg] = useState("")
+  const [msgType, setMsgType] = useState("")
 
 async function enviar(e){
+  e.preventDefault()
 
-e.preventDefault()
+  if (!jogador.trim() || !time.trim()) {
+    setMsg("Preencha nome e time.")
+    setMsgType("error")
+    return
+  }
 
-await fetch(
+  try {
+    const resposta = await fetch(
+      `http://127.0.0.1:5000/api/add_jogador?${new URLSearchParams({ jogador, time })}`
+    )
+    const dados = await resposta.json()
 
-"http://127.0.0.1:5000/api/add_jogador?"
-
-+
-
-new URLSearchParams({
-
-jogador,
-time
-
-})
-
-)
-
-setMsg(
-"Jogador salvo"
-)
-
-setJogador("")
-setTime("")
-
+    if (resposta.ok) {
+      setMsg(dados.mensagem || "Jogador salvo com sucesso.")
+      setMsgType("success")
+      setJogador("")
+      setTime("")
+    } else {
+      setMsg(dados.erro || dados.mensagem || "Erro ao salvar jogador.")
+      setMsgType("error")
+    }
+  } catch (erro) {
+    setMsg(erro.message || "Falha na conexão com a API.")
+    setMsgType("error")
+  }
 }
 
 return(
@@ -77,16 +65,9 @@ Nome
 </label>
 
 <input
-
-value={jogador}
-
-onChange={
-e=>
-setJogador(
-e.target.value
-)
-}
-
+  value={jogador}
+  onChange={e => setJogador(e.target.value)}
+  required
 />
 
 <label>
@@ -96,16 +77,9 @@ Time
 </label>
 
 <input
-
-value={time}
-
-onChange={
-e=>
-setTime(
-e.target.value
-)
-}
-
+  value={time}
+  onChange={e => setTime(e.target.value)}
+  required
 />
 
 <button
@@ -118,13 +92,11 @@ Salvar
 
 </form>
 
-<div
-className="msg"
->
-
-{msg}
-
-</div>
+{msg && (
+  <div className={`msg ${msgType}`}>
+    {msg}
+  </div>
+)}
 
 </div>
 
