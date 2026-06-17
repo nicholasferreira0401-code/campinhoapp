@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   // Função para carregar as partidas atualizadas
   function carregarPartidas() {
-    fetch("http://127.0.0.1:5000/api/partidas")
+    fetch("http://127.0.0.1:5000/api/partidas_df")
       .then((r) => r.json())
       .then(setPartidas)
       .catch(() => setPartidas([]))
@@ -85,7 +85,7 @@ export default function Dashboard() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/partidas", {
+      const response = await fetch("http://127.0.0.1:5000/api/partidas_df", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

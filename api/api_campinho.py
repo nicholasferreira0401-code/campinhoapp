@@ -5,7 +5,8 @@ import re
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+# Permite chamadas de qualquer origem (inclusive localhost:5173) e trata o preflight de CORS de forma nativa
+CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -49,7 +50,8 @@ def atualizar_jogador(df, nome, campo, time):
     if idx.any():
         df.loc[idx, campo] += 1
         time_atual = str(df.loc[idx, "time"].iloc[0]).strip().lower()
-        if time_atual in ["", "nan", "none"]:
+        # Se o jogador estava sem time registrado, vincula-o ao time atual da partida
+        if time_atual in ["", "nan", "none", "nulo", "não definido"]:
             df.loc[idx, "time"] = time
     else:
         novo_id = 1 if df.empty else int(df["ID_jogador"].max()) + 1
@@ -86,7 +88,7 @@ def atualizar_goleiro(df, nome, quantidade_defesas, time):
     if idx.any():
         df.loc[idx, "defesas"] += quantidade_defesas
         time_atual = str(df.loc[idx, "time"].iloc[0]).strip().lower()
-        if time_atual in ["", "nan", "none"]:
+        if time_atual in ["", "nan", "none", "nulo", "não definido"]:
             df.loc[idx, "time"] = time
     else:
         novo_id = 1 if df.empty else int(df["ID"].max()) + 1
@@ -166,16 +168,28 @@ def add_goleiro():
 # =====================
 # ROTAS PRINCIPAIS (PARTIDAS UNIFICADAS GET E POST)
 # =====================
-# Certifique-se de adicionar 'GET' na lista de métodos permitidos
-@app.route("/api/partidas", methods=["GET", "POST"])
+
+# =====================
+# ROTAS PRINCIPAIS (PARTIDAS UNIFICADAS GET E POST)
+# =====================
+
+# Ajustada a rota para '/api/partidas_df' para alinhar com o seu frontend React
+@app.route("/api/partidas_df", methods=["GET", "POST", "OPTIONS"])
 def gerenciar_partidas():
     
     # --- COMPORTAMENTO GET (Listar Partidas na Tabela/Dashboard) ---
     if request.method == "GET":
         try:
+            if not os.path.exists(csv_partidas) or os.stat(csv_partidas).st_size == 0:
+                return jsonify([]), 200
+                
             df = pd.read_csv(csv_partidas)
-            # Trata valores nulos para não quebrar o JSON do React
-            df = df.astype(object).where(pd.notnull(df), None)
+            
+            # Correção crucial: substitui NaNs e NaT (datas inválidas) por None (null no JSON)
+            # Evita o erro "Unexpected token 'N', ... NaN is not valid JSON" no console do React
+            df = df.replace({pd.NA: None, r'^[Nn]/[Aa]$': None}, regex=True)
+            df = df.where(pd.notnull(df), None)
+            
             return jsonify(df.to_dict(orient="records")), 200
         except Exception as e:
             return jsonify({"erro": f"Erro ao ler partidas: {str(e)}"}), 500
@@ -226,29 +240,29 @@ def gerenciar_partidas():
 
         # Atualiza estatísticas dos jogadores
         for scorer in parse_nomes(jogador1):
-            jogadores = atualizar_jogador(jogadores, scorer, "gols", "time1")
+            jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 1")
         for scorer in parse_nomes(jogador2):
-            jogadores = atualizar_jogador(jogadores, scorer, "gols", "time2")
+            jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 2")
         for assistente in parse_nomes(assist1):
-            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "time1")
+            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 1")
         for assistente in parse_nomes(assist2):
-            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "time2")
+            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 2")
 
         jogadores["total"] = jogadores["gols"] + jogadores["assistencias"]
 
         # Atualiza estatísticas dos goleiros
         if nome_goleiro1 and defesa1 > 0:
-            goleiros = atualizar_goleiro(goleiros, nome_goleiro1, defesa1, "time1")
+            goleiros = atualizar_goleiro(goleiros, nome_goleiro1, defesa1, "Time 1")
         if nome_goleiro2 and defesa2 > 0:
-            goleiros = atualizar_goleiro(goleiros, nome_goleiro2, defesa2, "time2")
+            goleiros = atualizar_goleiro(goleiros, nome_goleiro2, defesa2, "Time 2")
 
         # Define quem venceu o confronto
-        vencedor = "time1" if time1 > time2 else "time2" if time2 > time1 else "empate"
+        vencedor = "Time 1" if time1 > time2 else "Time 2" if time2 > time1 else "empate"
 
-        # Incrementa o ID da partida de forma dinâmica
+        # Incrementa o ID de forma dinâmica
         novo_id = 1 if partidas.empty else int(partidas["ID"].max()) + 1
         
-        # Monta a estrutura final mantendo compatibilidade com o CSV
+        # Monta o dicionário estruturado
         nova_partida_dict = {
             "ID": novo_id,
             "data": data_convertida.strftime("%d/%m/%Y"),
@@ -257,26 +271,25 @@ def gerenciar_partidas():
             "vencedor": vencedor,
             "gol_time1": jogador1 if jogador1 else None,
             "gol_time2": jogador2 if jogador2 else None,
-            "assistente_time1": assist1 if assist1 else None, # Ajustado para o plural padrão
-            "assistente_time2": assist2 if assist2 else None, # Ajustado para o plural padrão
+            "assistencia_time1": assist1 if assist1 else None, 
+            "assistencia_time2": assist2 if assist2 else None, 
             "goleiro_time1": nome_goleiro1 if nome_goleiro1 else None,
             "defesa_time1": defesa1,
             "goleiro_time2": nome_goleiro2 if nome_goleiro2 else None,
             "defesa_time2": defesa2
         }
 
-        # Concatena a nova linha no dataframe de partidas
         nova = pd.DataFrame([nova_partida_dict])
         partidas = pd.concat([partidas, nova], ignore_index=True)
 
-        # Salva as atualizações de volta nos arquivos CSV
+        # Salva as atualizações nos CSVs
         partidas.to_csv(csv_partidas, index=False)
         jogadores.to_csv(csv_jogadores, index=False)
         goleiros.to_csv(csv_goleiros, index=False)
 
         return jsonify(nova_partida_dict), 201
-    
-    
+
+
 # =====================
 # ROTAS DE CONSULTA RESTANTES
 # =====================
@@ -296,4 +309,5 @@ def jogadores_df():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Garante que roda em rede local e na porta 5000 procurada pelo React
+    app.run(host="127.0.0.1", port=5000, debug=True)
