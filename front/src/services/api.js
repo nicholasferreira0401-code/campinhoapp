@@ -4,9 +4,7 @@ const URL =
 export async function buscarPartidas(){
 
     const res =
-    await fetch(
-        `${URL}/api/partidas`
-    )
+    await fetch(`${URL}/api/partidas_df`)
 
     return await res.json()
 

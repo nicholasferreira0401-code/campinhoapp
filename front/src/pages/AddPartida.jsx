@@ -81,74 +81,114 @@ export default function AddPartida(){
   }
 
   async function enviar(e) {
-    e.preventDefault()
+e.preventDefault()
 
-    if (!data) {
-      setMsg("Preencha a data antes de salvar.")
-      setMsgType("error")
-      return
-    }
+if (!data) {
+setMsg("Preencha a data antes de salvar.")
+setMsgType("error")
+return
+}
 
-    // CORREÇÃO DO REPEAT: Agora repete gerando itens separados por vírgula corretamente
-    const formatarLista = (lista, chaveValor) => {
-      return lista.flatMap(item => Array(item[chaveValor]).fill(item.nome)).join(", ")
-    }
+const formatarLista = (lista, chaveValor) => {
+return lista
+.flatMap(item =>
+Array(item[chaveValor]).fill(item.nome)
+)
+.join(", ")
+}
 
-    const golString1 = formatarLista(goladores1, "gols")
-    const golString2 = formatarLista(goladores2, "gols")
-    const assistString1 = formatarLista(assist1, "assists")
-    const assistString2 = formatarLista(assist2, "assists")
+const golString1 = formatarLista(goladores1, "gols")
+const golString2 = formatarLista(goladores2, "gols")
 
-    // Corpo da requisição estruturado em formato JSON
-    const dadosPartida = {
-      data,
-      time1_placar: placar1,
-      time2_placar: placar2,
-      gol_time1: golString1 || "-",
-      gol_time2: golString2 || "-",
-      assistente_time1: assistString1 || "-",
-      assistente_time2: assistString2 || "-",
-      defesa_time1: defesa1 || 0,
-      defesa_time2: defesa2 || 0,
-      goleiro_time1: goleiro1 || "-",
-      goleiro_time2: goleiro2 || "-"
-    }
+const assistString1 = formatarLista(assist1, "assists")
+const assistString2 = formatarLista(assist2, "assists")
 
-    try {
-      // CORREÇÃO DO FETCH: Mudado para POST enviando JSON no body
-      const resposta = await fetch(`http://127.0.0.1:5000/api/partidas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dadosPartida)
-      })
-      
-      const dados = await resposta.json()
+const dadosPartida = {
+data,
 
-      if (resposta.ok) {
-        setMsg("✅ Partida cadastrada com sucesso.")
-        setMsgType("success")
-        
-        // Limpar formulário
-        setData("")
-        setGoladores1([])
-        setGoladores2([])
-        setAssist1([])
-        setAssist2([])
-        setGoleiro1("")
-        setDefesa1(0)
-        setGoleiro2("")
-        setDefesa2(0)
-      } else {
-        setMsg(`❌ ${dados.erro || dados.mensagem || "Erro ao salvar partida."}`)
-        setMsgType("error")
-      }
-    } catch (erro) {
-      setMsg(`❌ ${erro.message || "Falha ao conectar com a API."}`)
-      setMsgType("error")
-    }
-  }
+time1_placar: placar1,
+time2_placar: placar2,
+
+gol_time1: golString1 || "-",
+gol_time2: golString2 || "-",
+
+assistencia_time1: assistString1 || "-",
+assistencia_time2: assistString2 || "-",
+
+goleiro_time1: goleiro1 || "-",
+goleiro_time2: goleiro2 || "-",
+
+defesa_time1: Number(defesa1) || 0,
+defesa_time2: Number(defesa2) || 0
+
+}
+
+try {
+const resposta = await fetch(
+"http://127.0.0.1:5000/api/partidas_df",
+{
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify(dadosPartida)
+}
+)
+
+let retorno = {}
+
+try {
+  retorno = await resposta.json()
+} catch {
+  retorno = {}
+}
+
+if (!resposta.ok) {
+  throw new Error(
+    retorno.erro ||
+    retorno.mensagem ||
+    `Erro ${resposta.status}`
+  )
+}
+
+setMsg("✅ Partida cadastrada com sucesso.")
+setMsgType("success")
+
+// limpar tudo
+setData("")
+
+setGoladores1([])
+setGoladores2([])
+
+setAssist1([])
+setAssist2([])
+
+setNovoGolador1({ nome: "", gols: 0 })
+setNovoGolador2({ nome: "", gols: 0 })
+
+setNovoAssist1({ nome: "", assists: 0 })
+setNovoAssist2({ nome: "", assists: 0 })
+
+setGoleiro1("")
+setGoleiro2("")
+
+setDefesa1(0)
+setDefesa2(0)
+
+} catch (erro) {
+console.error(erro)
+
+setMsg(
+  `❌ ${
+    erro.message ||
+    "Falha ao conectar com a API."
+  }`
+)
+
+setMsgType("error")
+
+}
+}
 
   return(
     <div className="container-form">
