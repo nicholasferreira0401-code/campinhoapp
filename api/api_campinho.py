@@ -239,7 +239,7 @@ def gerenciar_partidas():
                 )
 
             # últimas partidas
-            df = df.head(20)
+            df = df.head(30)
 
             df = df.fillna("")
 
