@@ -181,6 +181,9 @@ def gerenciar_partidas():
     # ==================
     # GET
     # ==================
+    # ==================
+    # GET
+    # ==================
     if request.method == "GET":
 
         try:
@@ -199,50 +202,51 @@ def gerenciar_partidas():
             if df.empty:
                 return jsonify([])
 
+            # ordenar corretamente
             if "data" in df.columns:
 
                 df["data_ord"] = pd.to_datetime(
                     df["data"],
-                    format="%d/%m/%Y",
+                    errors="coerce",
+                    dayfirst=True
+                )
+
+                df["ID"] = pd.to_numeric(
+                    df["ID"],
                     errors="coerce"
                 )
 
                 df = (
                     df
                     .sort_values(
-                        ["data_ord", "ID"],
-                        ascending=[False, False]
+                        by=["data_ord", "ID"],
+                        ascending=[False, False],
+                        na_position="last"
                     )
-                    .drop(
-                        columns=["data_ord"]
-                    )
+                    .drop(columns=["data_ord"])
                 )
 
-            # CORREÇÃO DEFINITIVA DO JSON
+            else:
+
+                df["ID"] = pd.to_numeric(
+                    df["ID"],
+                    errors="coerce"
+                )
+
+                df = df.sort_values(
+                    by="ID",
+                    ascending=False
+                )
+
+            # últimas partidas
+            df = df.head(20)
+
             df = df.fillna("")
 
-            resultado = []
-
-            for linha in df.to_dict(
-                orient="records"
-            ):
-
-                limpa = {}
-
-                for k, v in linha.items():
-
-                    if pd.isna(v):
-                        limpa[k] = ""
-
-                    else:
-                        limpa[k] = v
-
-                resultado.append(
-                    limpa
-                )
-
             return jsonify(
-                resultado
+                df.to_dict(
+                    orient="records"
+                )
             )
 
         except Exception as e:
@@ -256,7 +260,7 @@ def gerenciar_partidas():
     # ==================
 
     if request.method == "POST":
-
+        
         try:
 
             dados = request.get_json()
@@ -303,10 +307,11 @@ def gerenciar_partidas():
                 "ID":
                 novo_id,
 
-                "data":
-                dados.get(
-                    "data"
-                ),
+                "data": pd.to_datetime(
+                    dados.get("data"),
+                    dayfirst=True,
+                    errors="coerce"
+                ).strftime("%d/%m/%Y"),
 
                 "time1_placar":
                 time1,
@@ -368,15 +373,101 @@ def gerenciar_partidas():
                 ignore_index=True
             )
 
+            # =====================
+            # ATUALIZAR JOGADORES
+            # =====================
+
+            # =====================
+            # ATUALIZAR JOGADORES
+            # =====================
+
+            jogadores = pd.read_csv(
+                csv_jogadores,
+                keep_default_na=False
+            )
+
+            for nome in parse_nomes(
+                dados.get("gol_time1")
+            ):
+                jogadores = atualizar_jogador(
+                    jogadores,
+                    nome,
+                    "gols",
+                    "time1"
+                )
+
+            for nome in parse_nomes(
+                dados.get("gol_time2")
+            ):
+                jogadores = atualizar_jogador(
+                    jogadores,
+                    nome,
+                    "gols",
+                    "time2"
+                )
+
+            for nome in parse_nomes(
+                dados.get("assistencia_time1")
+            ):
+                jogadores = atualizar_jogador(
+                    jogadores,
+                    nome,
+                    "assistencias",
+                    "time1"
+                )
+
+            for nome in parse_nomes(
+                dados.get("assistencia_time2")
+            ):
+                jogadores = atualizar_jogador(
+                    jogadores,
+                    nome,
+                    "assistencias",
+                    "time2"
+                )
+
+            # recalcular total
+
+            jogadores["gols"] = (
+                pd.to_numeric(
+                    jogadores["gols"],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .astype(int)
+            )
+
+            jogadores["assistencias"] = (
+                pd.to_numeric(
+                    jogadores["assistencias"],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .astype(int)
+            )
+
+            jogadores["total"] = (
+                jogadores["gols"]
+                +
+                jogadores["assistencias"]
+            )
+
+            # salvar
+
             partidas.to_csv(
                 csv_partidas,
+                index=False
+            )
+
+            jogadores.to_csv(
+                csv_jogadores,
                 index=False
             )
 
             return jsonify(
                 nova
             ), 201
-
+        
         except Exception as e:
 
             return jsonify({
