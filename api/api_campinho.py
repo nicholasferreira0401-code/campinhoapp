@@ -50,7 +50,6 @@ def atualizar_jogador(df, nome, campo, time):
     if idx.any():
         df.loc[idx, campo] += 1
         time_atual = str(df.loc[idx, "time"].iloc[0]).strip().lower()
-        # Se o jogador estava sem time registrado, vincula-o ao time atual da partida
         if time_atual in ["", "nan", "none", "nulo", "não definido"]:
             df.loc[idx, "time"] = time
     else:
@@ -173,7 +172,6 @@ def add_goleiro():
 # ROTAS PRINCIPAIS (PARTIDAS UNIFICADAS GET E POST)
 # =====================
 
-# Ajustada a rota para '/api/partidas_df' para alinhar com o seu frontend React
 @app.route("/api/partidas_df", methods=["GET", "POST", "OPTIONS"])
 def gerenciar_partidas():
     
@@ -185,9 +183,8 @@ def gerenciar_partidas():
                 
             df = pd.read_csv(csv_partidas)
             
-            # Correção crucial: substitui NaNs e NaT (datas inválidas) por None (null no JSON)
-            # Evita o erro "Unexpected token 'N', ... NaN is not valid JSON" no console do React
-            df = df.replace({pd.NA: None, r'^[Nn]/[Aa]$': None}, regex=True)
+            # Força a conversão de qualquer NaN residual do arquivo para None (null no JSON)
+            df = df.replace({pd.NA: None, float('nan'): None})
             df = df.where(pd.notnull(df), None)
             
             return jsonify(df.to_dict(orient="records")), 200
@@ -200,96 +197,107 @@ def gerenciar_partidas():
         if not dados:
             return jsonify({"erro": "Nenhum dado enviado"}), 400
 
+        # O único item estritamente obrigatório é a data
         data = dados.get("data")
-        time1 = dados.get("time1_placar")
-        time2 = dados.get("time2_placar")
-        
-        jogador1 = dados.get("gol_time1")
-        jogador2 = dados.get("gol_time2")
-        assist1 = dados.get("assistente_time1")
-        assist2 = dados.get("assistente_time2")
-
-        nome_goleiro1 = dados.get("goleiro_time1")
-        defesa1 = dados.get("defesa_time1", 0)
-        nome_goleiro2 = dados.get("goleiro_time2")
-        defesa2 = dados.get("defesa_time2", 0)
-
-        try:
-            time1 = int(time1) if time1 is not None else 0
-            time2 = int(time2) if time2 is not None else 0
-            defesa1 = int(defesa1) if defesa1 is not None else 0
-            defesa2 = int(defesa2) if defesa2 is not None else 0
-        except ValueError:
-            return jsonify({"erro": "Placares e defesas devem ser números válidos"}), 400
-
-        if not data:
+        if not data or str(data).strip() == "":
             return jsonify({"erro": "Informe uma data válida"}), 400
 
         data_convertida = pd.to_datetime(data, errors="coerce")
         if pd.isna(data_convertida):
             return jsonify({"erro": "Data inválida"}), 400
 
+        # Função interna rápida para tratar números vazios, nulos ou strings inválidas
+        def normalizar_int(valor):
+            if valor is None or str(valor).strip() == "":
+                return 0
+            try:
+                return int(valor)
+            except ValueError:
+                return 0
+
+        # Função interna para tratar strings vazias
+        def normalizar_txt(valor):
+            if valor is None or str(valor).strip() == "":
+                return None
+            return str(valor).strip()
+
+        # Coleta e normaliza de forma segura todos os campos do request
+        time1 = normalizar_int(dados.get("time1_placar"))
+        time2 = normalizar_int(dados.get("time2_placar"))
+        defesa1 = normalizar_int(dados.get("defesa_time1"))
+        defesa2 = normalizar_int(dados.get("defesa_time2"))
+
+        jogador1 = normalizar_txt(dados.get("gol_time1"))
+        jogador2 = normalizar_txt(dados.get("gol_time2"))
+        assist1 = normalizar_txt(dados.get("assistente_time1"))
+        assist2 = normalizar_txt(dados.get("assistente_time2"))
+
+        nome_goleiro1 = normalizar_txt(dados.get("goleiro_time1"))
+        nome_goleiro2 = normalizar_txt(dados.get("goleiro_time2"))
+
         # Carrega os arquivos CSV existentes
         partidas = pd.read_csv(csv_partidas)
         jogadores = pd.read_csv(csv_jogadores)
         goleiros = pd.read_csv(csv_goleiros)
 
+        # Força tipagem correta nas tabelas de histórico antes de atualizar
         jogadores["gols"] = pd.to_numeric(jogadores["gols"], errors="coerce").fillna(0).astype(int)
         jogadores["assistencias"] = pd.to_numeric(jogadores["assistencias"], errors="coerce").fillna(0).astype(int)
         goleiros["defesas"] = pd.to_numeric(goleiros["defesas"], errors="coerce").fillna(0).astype(int)
 
-        # Atualiza estatísticas dos jogadores
-        for scorer in parse_nomes(jogador1):
-            jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 1")
-        for scorer in parse_nomes(jogador2):
-            jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 2")
-        for assistente in parse_nomes(assist1):
-            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 1")
-        for assistente in parse_nomes(assist2):
-            jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 2")
+        # Processa os nomes apenas se existirem dados válidos
+        if jogador1:
+            for scorer in parse_nomes(jogador1):
+                jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 1")
+        if jogador2:
+            for scorer in parse_nomes(jogador2):
+                jogadores = atualizar_jogador(jogadores, scorer, "gols", "Time 2")
+        if assist1:
+            for assistente in parse_nomes(assist1):
+                jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 1")
+        if assist2:
+            for assistente in parse_nomes(assist2):
+                jogadores = atualizar_jogador(jogadores, assistente, "assistencias", "Time 2")
 
         jogadores["total"] = jogadores["gols"] + jogadores["assistencias"]
 
-        # Atualiza estatísticas dos goleiros
+        # Atualiza goleiros se houver nome válido e defesas maiores que 0
         if nome_goleiro1 and defesa1 > 0:
             goleiros = atualizar_goleiro(goleiros, nome_goleiro1, defesa1, "Time 1")
         if nome_goleiro2 and defesa2 > 0:
             goleiros = atualizar_goleiro(goleiros, nome_goleiro2, defesa2, "Time 2")
 
-        # Define quem venceu o confronto
+        # Define o resultado da partida
         vencedor = "Time 1" if time1 > time2 else "Time 2" if time2 > time1 else "empate"
-
-        # Incrementa o ID de forma dinâmica
         novo_id = 1 if partidas.empty else int(partidas["ID"].max()) + 1
         
-        # Monta o dicionário estruturado
+        # Cria a estrutura limpa trocando qualquer lacuna por None (vazio real no CSV)
         nova_partida_dict = {
             "ID": novo_id,
             "data": data_convertida.strftime("%d/%m/%Y"),
             "time1_placar": time1,
             "time2_placar": time2,
             "vencedor": vencedor,
-            "gol_time1": jogador1 if jogador1 else None,
-            "gol_time2": jogador2 if jogador2 else None,
-            "assistencia_time1": assist1 if assist1 else None, 
-            "assistencia_time2": assist2 if assist2 else None, 
-            "goleiro_time1": nome_goleiro1 if nome_goleiro1 else None,
+            "gol_time1": jogador1,
+            "gol_time2": jogador2,
+            "assistencia_time1": assist1, 
+            "assistencia_time2": assist2, 
+            "goleiro_time1": nome_goleiro1,
             "defesa_time1": defesa1,
-            "goleiro_time2": nome_goleiro2 if nome_goleiro2 else None,
+            "goleiro_time2": nome_goleiro2,
             "defesa_time2": defesa2
         }
 
+        # Concatena a nova linha usando dicionário direto para evitar geração de NaNs ocultos
         nova = pd.DataFrame([nova_partida_dict])
         partidas = pd.concat([partidas, nova], ignore_index=True)
 
-        # Salva as atualizações nos CSVs
+        # Salva de volta nos arquivos locais
         partidas.to_csv(csv_partidas, index=False)
         jogadores.to_csv(csv_jogadores, index=False)
         goleiros.to_csv(csv_goleiros, index=False)
 
         return jsonify(nova_partida_dict), 201
-
-
 # =====================
 # ROTAS DE CONSULTA RESTANTES
 # =====================
@@ -309,5 +317,4 @@ def jogadores_df():
 
 
 if __name__ == "__main__":
-    # Garante que roda em rede local e na porta 5000 procurada pelo React
     app.run(host="127.0.0.1", port=5000, debug=True)
