@@ -1,11 +1,5 @@
-const URL =
-"http://127.0.0.1:5000"
+import axios from "axios"
 
-export async function buscarPartidas(){
-
-    const res =
-    await fetch(`${URL}/api/partidas_df`)
-
-    return await res.json()
-
-}
+export default axios.create({
+    baseURL: "http://127.0.0.1:5000"
+})

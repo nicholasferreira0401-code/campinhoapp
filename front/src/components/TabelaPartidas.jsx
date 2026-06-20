@@ -1,17 +1,23 @@
-import React from 'react';
+import React from "react"
 
-function TabelaPartidas({ dados }) {
-  // Função auxiliar para deixar o texto do vencedor mais bonito na tela
+function TabelaPartidas({ dados = [] }) {
+
   const formatarVencedor = (vencedor) => {
-    if (vencedor === 'time1') return '🏆 Time 1';
-    if (vencedor === 'time2') return '🏆 Time 2';
-    if (vencedor === 'empate') return '🤝 Empate';
-    return vencedor; // Caso venha outro formato
-  };
+    if (vencedor === "time1") return "🏆 Time 1"
+    if (vencedor === "time2") return "🏆 Time 2"
+    if (vencedor === "empate") return "🤝 Empate"
+    return vencedor || "-"
+  }
 
-  // Garante que a tabela não quebre se "dados" não for um array ou estiver vazio
-  if (!dados || dados.length === 0) {
-    return <p className="tabela-vazia">Nenhuma partida registrada até o momento.</p>;
+  if (
+    !Array.isArray(dados) ||
+    dados.length === 0
+  ) {
+    return (
+      <p className="tabela-vazia">
+        Nenhuma partida registrada.
+      </p>
+    )
   }
 
   return (
@@ -28,26 +34,61 @@ function TabelaPartidas({ dados }) {
           <th>Vencedor</th>
         </tr>
       </thead>
+
       <tbody>
-        {dados.map((p) => (
-          <tr key={p.ID}>
-            <td>{p.ID}</td>
-            <td>{p.data}</td>
-            <td className="placar-celula">
-              <strong>{p.time1_placar}</strong> × <strong>{p.time2_placar}</strong>
+        {dados.map((p, index) => (
+
+          <tr
+            key={
+              p.ID ??
+              `${p.data}-${p.time1_placar}-${p.time2_placar}-${index}`
+            }
+          >
+
+            <td>{p.ID ?? "-"}</td>
+
+            <td>{p.data ?? "-"}</td>
+
+            <td>
+              <strong>
+                {p.time1_placar ?? 0}
+              </strong>
+
+              {" × "}
+
+              <strong>
+                {p.time2_placar ?? 0}
+              </strong>
             </td>
-            <td>{p.gol_time1 || '-'}</td>
-            <td>{p.gol_time2 || '-'}</td>
-            <td>{p.assistencia_time1 || '-'}</td>
-            <td>{p.assistencia_time2 || '-'}</td>
-            <td className={`vencedor-${p.vencedor}`}>
-              {formatarVencedor(p.vencedor)}
+
+            <td>{p.gol_time1 || "-"}</td>
+
+            <td>{p.gol_time2 || "-"}</td>
+
+            <td>
+              {p.assistencia_time1 ||
+              p.assistente_time1 ||
+              "-"}
             </td>
+
+            <td>
+              {p.assistencia_time2 ||
+              p.assistente_time2 ||
+              "-"}
+            </td>
+
+            <td>
+              {formatarVencedor(
+                p.vencedor
+              )}
+            </td>
+
           </tr>
+
         ))}
       </tbody>
     </table>
-  );
+  )
 }
 
-export default TabelaPartidas;
+export default TabelaPartidas

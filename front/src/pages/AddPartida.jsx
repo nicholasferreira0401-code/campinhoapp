@@ -1,7 +1,15 @@
 import "../styles/formulario.css"
+
 import { useState } from "react"
 
+import {
+criarPartida
+}
+from "../services/partidasService"
+
+
 export default function AddPartida(){
+  
   const [data, setData] = useState("")
   
   // Time 1 - Gols e Assists
@@ -124,16 +132,230 @@ defesa_time2: Number(defesa2) || 0
 }
 
 try {
-const resposta = await fetch(
-"http://127.0.0.1:5000/api/partidas_df",
-{
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify(dadosPartida)
-}
+async function enviar(e){
+
+e.preventDefault()
+
+if(!data){
+
+setMsg(
+"Preencha a data antes de salvar."
 )
+
+setMsgType(
+"error"
+)
+
+return
+
+}
+
+
+const formatarLista = (
+
+lista,
+
+campo
+
+)=>
+
+lista
+
+.flatMap(
+
+item=>
+
+Array(
+
+item[campo]
+
+)
+
+.fill(
+
+item.nome
+
+)
+
+)
+
+.join(", ")
+
+
+
+const dadosPartida={
+
+data,
+
+time1_placar:
+
+placar1,
+
+time2_placar:
+
+placar2,
+
+gol_time1:
+
+formatarLista(
+
+goladores1,
+
+"gols"
+
+)||"-",
+
+gol_time2:
+
+formatarLista(
+
+goladores2,
+
+"gols"
+
+)||"-",
+
+assistencia_time1:
+
+formatarLista(
+
+assist1,
+
+"assists"
+
+)||"-",
+
+assistencia_time2:
+
+formatarLista(
+
+assist2,
+
+"assists"
+
+)||"-",
+
+goleiro_time1:
+
+goleiro1||"-",
+
+goleiro_time2:
+
+goleiro2||"-",
+
+defesa_time1:
+
+Number(
+
+defesa1
+
+)||0,
+
+defesa_time2:
+
+Number(
+
+defesa2
+
+)||0
+
+}
+
+
+try{
+
+await criarPartida(
+
+dadosPartida
+
+)
+
+
+setMsg(
+"✅ Partida cadastrada"
+)
+
+setMsgType(
+"success"
+)
+
+
+setData("")
+
+setGoladores1([])
+setGoladores2([])
+
+setAssist1([])
+setAssist2([])
+
+
+setNovoGolador1({
+nome:"",
+gols:0
+})
+
+setNovoGolador2({
+nome:"",
+gols:0
+})
+
+setNovoAssist1({
+nome:"",
+assists:0
+})
+
+setNovoAssist2({
+nome:"",
+assists:0
+})
+
+setGoleiro1("")
+setGoleiro2("")
+
+setDefesa1(0)
+setDefesa2(0)
+
+}
+
+catch(
+
+erro
+
+){
+
+console.error(
+erro
+)
+
+setMsg(
+
+erro
+
+?.response
+
+?.data
+
+?.erro
+
+||
+
+erro
+
+?.message
+
+||
+
+"Erro ao salvar"
+
+)
+
+setMsgType(
+"error"
+)
+
+}
+
+}
 
 let retorno = {}
 
@@ -211,7 +433,7 @@ setMsgType("error")
             {goladores1.length > 0 && (
               <div style={{ marginBottom: "16px" }}>
                 {goladores1.map((g, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  <div key={`${g.nome}-${idx}`} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
                     {/* CORREÇÃO DE COR: color mudado para #ffffff */}
                     <span style={{ flex: 1, color: "#ffffff" }}>
                       {g.nome}: {g.gols} {g.gols === 1 ? "gol" : "gols"}
@@ -261,7 +483,7 @@ setMsgType("error")
             {assist1.length > 0 && (
               <div style={{ marginBottom: "16px" }}>
                 {assist1.map((a, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  <div key={`${g.nome}-${idx}`} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
                     {/* CORREÇÃO DE COR: color mudado para #ffffff */}
                     <span style={{ flex: 1, color: "#ffffff" }}>
                       {a.nome}: {a.assists} {a.assists === 1 ? "assistência" : "assistências"}
@@ -311,7 +533,7 @@ setMsgType("error")
             {goladores2.length > 0 && (
               <div style={{ marginBottom: "16px" }}>
                 {goladores2.map((g, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  <div key={`${g.nome}-${idx}`} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
                     {/* CORREÇÃO DE COR: color mudado para #ffffff */}
                     <span style={{ flex: 1, color: "#ffffff" }}>
                       {g.nome}: {g.gols} {g.gols === 1 ? "gol" : "gols"}
@@ -361,7 +583,7 @@ setMsgType("error")
             {assist2.length > 0 && (
               <div style={{ marginBottom: "16px" }}>
                 {assist2.map((a, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  <div key={`${g.nome}-${idx}`} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
                     {/* CORREÇÃO DE COR: color mudado para #ffffff */}
                     <span style={{ flex: 1, color: "#ffffff" }}>
                       {a.nome}: {a.assists} {a.assists === 1 ? "assistência" : "assistências"}
@@ -459,9 +681,19 @@ setMsgType("error")
           </button>
         </form>
 
-        <div className={`msg ${msgType}`}>
+        {
+          msg && (
+
+          <div
+          className={`msg ${msgType}`}
+          >
+
           {msg}
-        </div>
+
+          </div>
+
+          )
+        }
       </div>
     </div>
   )

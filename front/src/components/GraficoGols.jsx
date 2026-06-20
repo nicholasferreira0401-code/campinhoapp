@@ -1,112 +1,102 @@
 import {
-Bar
-}
-from "react-chartjs-2"
+  Bar
+} from "react-chartjs-2"
 
 import {
-Chart,
-CategoryScale,
-LinearScale,
-BarElement,
-Title,
-Tooltip,
-Legend
-}
-from "chart.js"
+  Chart,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js"
 
 Chart.register(
-CategoryScale,
-LinearScale,
-BarElement,
-Title,
-Tooltip,
-Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
 )
 
-export default function GraficoGols(
-{
-partidas
-}
-){
+export default function GraficoGols({
+  partidas = []
+}) {
 
-const dados={
+  const lista =
+    Array.isArray(partidas)
+      ? partidas
+      : []
 
-labels:
+  const dados = {
 
-partidas.map(
-(_,i)=>
-`Jogo ${
-i+1
-}`
-),
+    labels:
 
-datasets:[
-{
+    lista.map(
+      (_, i) =>
+        `Jogo ${i + 1}`
+    ),
 
-label:"Gols",
+    datasets: [
+      {
 
-data:
+        label: "Gols",
 
-partidas.map(
+        data:
 
-p=>
+        lista.map(
+          p =>
+            Number(
+              p?.time1_placar || 0
+            ) +
 
-Number(
-p.time1_placar
-)+
+            Number(
+              p?.time2_placar || 0
+            )
+        ),
 
-Number(
-p.time2_placar
-)
+        backgroundColor:
+          "#3B82F6",
 
-),
+        borderColor:
+          "#60A5FA",
 
-backgroundColor:
+        borderWidth: 2,
 
-[
-"#3B82F6"
-],
+        borderRadius: 8
 
-borderColor:
+      }
+    ]
+  }
 
-[
-"#60A5FA"
-],
+  return (
 
-borderWidth:2,
+    <div
+      style={{
+        width: "700px",
+        height: "350px",
+        margin: "auto"
+      }}
+    >
 
-borderRadius:8
+      <Bar
 
-}
-]
+        data={dados}
 
-}
+        options={{
 
-return(
+          responsive: true,
 
-<div
-style={{
-width:"700px",
-height:"350px",
-margin:"auto"
-}}
->
+          maintainAspectRatio: false
 
-<Bar
-data={dados}
+        }}
 
-options={{
+      />
 
-responsive:true,
+    </div>
 
-maintainAspectRatio:false
-
-}}
-
- />
-
-</div>
-
-)
+  )
 
 }

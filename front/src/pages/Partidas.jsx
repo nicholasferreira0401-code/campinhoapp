@@ -7,22 +7,45 @@ export default function Partidas() {
   const [carregando, setCarregando] = useState(true)
 
   useEffect(() => {
-    async function carregar() {
-      try {
-        const resposta = await fetch("http://127.0.0.1:5000/api/partidas_df")
-        const dados = await resposta.json()
-        
-        console.log("API:", dados)
-        setPartidas(dados)
-      } catch (erro) {
-        console.log("Erro ao carregar partidas:", erro)
-      } finally {
-        setCarregando(false)
-      }
-    }
+  async function carregar() {
+    try {
+      const resposta =
+        await fetch(
+          "http://127.0.0.1:5000/api/partidas_df"
+        )
 
-    carregar()
-  }, [])
+      const dados =
+        await resposta.json()
+
+      console.log("API:", dados)
+
+      setPartidas(
+        Array.isArray(dados)
+          ? dados
+          : Array.isArray(dados.partidas)
+          ? dados.partidas
+          : []
+      )
+
+    } catch (erro) {
+
+      console.log(
+        "Erro ao carregar partidas:",
+        erro
+      )
+
+      setPartidas([])
+
+    } finally {
+
+      setCarregando(false)
+
+    }
+  }
+
+  carregar()
+
+}, [])
 
   return (
     <div className="page-container" style={{ padding: "20px" }}>

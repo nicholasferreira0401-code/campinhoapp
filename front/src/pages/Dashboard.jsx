@@ -23,20 +23,23 @@ export default function Dashboard() {
   const [formMsgType, setFormMsgType] = useState("")
 
   // Função para carregar os jogadores atualizados
-  function carregarJogadores() {
-    fetch("http://127.0.0.1:5000/api/jogadores_df")
-      .then((r) => r.json())
-      .then(setJogadores)
-      .catch(() => setJogadores([]))
-  }
-
-  // Função para carregar as partidas atualizadas
   function carregarPartidas() {
-    fetch("http://127.0.0.1:5000/api/partidas_df")
-      .then((r) => r.json())
-      .then(setPartidas)
-      .catch(() => setPartidas([]))
-  }
+  fetch("http://127.0.0.1:5000/api/partidas_df")
+    .then((r) => r.json())
+    .then((dados) =>
+      setPartidas(Array.isArray(dados) ? dados : [])
+    )
+    .catch(() => setPartidas([]))
+}
+
+function carregarJogadores() {
+  fetch("http://127.0.0.1:5000/api/jogadores_df")
+    .then((r) => r.json())
+    .then((dados) =>
+      setJogadores(Array.isArray(dados) ? dados : [])
+    )
+    .catch(() => setJogadores([]))
+}
 
   useEffect(() => {
     carregarPartidas()
@@ -129,21 +132,33 @@ export default function Dashboard() {
   const totalPartidas = partidas.length
   const totalJogadores = jogadores.length
   
-  const totalGols = partidas.reduce(
+  const totalGols =(partidas || []).reduce(
     (acc, p) => acc + Number(p.time1_placar || 0) + Number(p.time2_placar || 0),
     0
   )
   
-  const totalAssistencias = partidas.reduce((acc, p) => {
-    const a1 = p.assistencia_time1 || p.assistente_time1 || p.assist1 || null
-    const a2 = p.assistencia_time2 || p.assistente_time2 || p.assist2 || null
-    return acc + (a1 ? 1 : 0) + (a2 ? 1 : 0)
-  }, 0)
+  const totalAssistencias = Array.isArray(partidas)
+  ? partidas.reduce((acc, p) => {
+      const a1 =
+        p.assistencia_time1 ||
+        p.assistente_time1 ||
+        p.assist1
+
+      const a2 =
+        p.assistencia_time2 ||
+        p.assistente_time2 ||
+        p.assist2
+
+      return acc + (a1 ? 1 : 0) + (a2 ? 1 : 0)
+    }, 0)
+  : 0
 
   // Ordenação das partidas para exibir os últimos resultados
   // 1. Filtra as partidas para ignorar repetições com os mesmos dados exatos
   // 1. Filtra as partidas usando as propriedades exatas que vêm do seu backend (assistente_timeX)
-  const partidasSemRepetidos = partidas.filter((partida, index, self) => {
+  const partidasSemRepetidos =
+(partidas || []).filter(
+(partida,index,self)=>{
     return index === self.findIndex((p) => 
       p.data === partida.data &&
       p.time1_placar === partida.time1_placar &&
@@ -180,17 +195,20 @@ export default function Dashboard() {
       }
       
       // Se a data for exatamente igual, o maior ID desempata no topo
-      return Number(b.ID || 0) - Number(a.ID || 0);
+      return Number(b.id || 0) - Number(a.id || 0);
     })
     .slice(0, 5);
     
-  const topJogadores = [...jogadores]
+  const topJogadores = [...(jogadores || [])]
     .sort((a, b) =>
       Number(b.total || 0) - Number(a.total || 0) ||
       Number(b.gols || 0) - Number(a.gols || 0)
     )
     .slice(0, 5)
-
+console.log("partidas:", partidas)
+console.log("jogadores:", jogadores)
+console.log("ultimasPartidas:", ultimasPartidas)
+console.log("topJogadores:", topJogadores)
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -251,9 +269,9 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {ultimasPartidas.map((p) => (
-                  <tr key={p.ID || `${p.data}-${p.time1_placar}`}>
-                    <td>{p.ID}</td>
+                {ultimasPartidas.map((p, index) => (
+                  <tr key={p.id || `${p.data}-${index}`}>
+                    <td>{p.id}</td>
                     <td>{p.data}</td>
                     <td>{p.time1_placar} x {p.time2_placar}</td>
                     <td>{p.gol_time1 || "-"}</td>
@@ -568,7 +586,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <GraficoGols partidas={partidas} />
+      {/* <GraficoGols partidas={partidas} /> */}
     </div>
   )
 }
