@@ -41,33 +41,135 @@ if not os.path.exists(csv_goleiros):
 # =====================
 
 def atualizar_jogador(df, nome, campo, time):
+
     if not nome:
         return df
 
     nome = str(nome).strip()
-    idx = df["jogador"].astype(str).str.lower() == nome.lower()
+
+    # garante tipos numéricos
+    for col in ["gols", "assistencias", "total"]:
+
+        if col not in df.columns:
+            df[col] = 0
+
+        df[col] = (
+            pd.to_numeric(
+                df[col],
+                errors="coerce"
+            )
+            .fillna(0)
+            .astype(int)
+        )
+
+    idx = (
+
+        df["jogador"]
+
+        .astype(str)
+
+        .str.strip()
+
+        .str.lower()
+
+        ==
+
+        nome.lower()
+
+    )
 
     if idx.any():
-        df.loc[idx, campo] += 1
-        time_atual = str(df.loc[idx, "time"].iloc[0]).strip().lower()
-        if time_atual in ["", "nan", "none", "nulo", "não definido"]:
+
+        valor = int(
+
+            df.loc[idx, campo]
+
+            .iloc[0]
+
+        )
+
+        df.loc[idx, campo] = valor + 1
+
+        df.loc[idx, "total"] = (
+
+            df.loc[idx, "gols"]
+
+            +
+
+            df.loc[idx, "assistencias"]
+
+        )
+
+        time_atual = (
+
+            str(
+                df.loc[
+                    idx,
+                    "time"
+                ].iloc[0]
+            )
+
+            .strip()
+
+            .lower()
+
+        )
+
+        if time_atual in ["", "nan"]:
+
             df.loc[idx, "time"] = time
+
     else:
-        novo_id = 1 if df.empty else int(df["ID_jogador"].max()) + 1
+
+        novo_id = (
+
+            1
+
+            if df.empty
+
+            else
+
+            int(
+
+                df["ID_jogador"]
+
+                .max()
+
+            ) + 1
+
+        )
+
         novo = {
+
             "ID_jogador": novo_id,
+
             "jogador": nome,
+
             "time": time,
+
             "gols": 0,
+
             "assistencias": 0,
+
             "total": 0
+
         }
+
         novo[campo] = 1
-        novo["total"] = 1
+
+        novo["total"] = (
+
+            novo["gols"]
+
+            +
+
+            novo["assistencias"]
+
+        )
+
         df.loc[len(df)] = novo
 
     return df
-
 
 def parse_nomes(valor):
     if not valor:
@@ -381,14 +483,59 @@ def gerenciar_partidas():
             # ATUALIZAR JOGADORES
             # =====================
 
+            # =====================
+            # ATUALIZAR JOGADORES
+            # =====================
+
             jogadores = pd.read_csv(
                 csv_jogadores,
                 keep_default_na=False
             )
 
+            # garantir números
+            for coluna in [
+                "gols",
+                "assistencias",
+                "total"
+            ]:
+
+                jogadores[coluna] = (
+                    pd.to_numeric(
+                        jogadores[coluna],
+                        errors="coerce"
+                    )
+                    .fillna(0)
+                    .astype(int)
+                )
+
+
+            # DEBUG
+            print(
+                "ASSIST TIME1:",
+                parse_nomes(
+                    dados.get(
+                        "assistencia_time1"
+                    )
+                )
+            )
+
+            print(
+                "ASSIST TIME2:",
+                parse_nomes(
+                    dados.get(
+                        "assistencia_time2"
+                    )
+                )
+            )
+
+
+            # gols time1
             for nome in parse_nomes(
-                dados.get("gol_time1")
+                dados.get(
+                    "gol_time1"
+                )
             ):
+
                 jogadores = atualizar_jogador(
                     jogadores,
                     nome,
@@ -396,9 +543,14 @@ def gerenciar_partidas():
                     "time1"
                 )
 
+
+            # gols time2
             for nome in parse_nomes(
-                dados.get("gol_time2")
+                dados.get(
+                    "gol_time2"
+                )
             ):
+
                 jogadores = atualizar_jogador(
                     jogadores,
                     nome,
@@ -406,9 +558,14 @@ def gerenciar_partidas():
                     "time2"
                 )
 
+
+            # assistências time1
             for nome in parse_nomes(
-                dados.get("assistencia_time1")
+                dados.get(
+                    "assistencia_time1"
+                )
             ):
+
                 jogadores = atualizar_jogador(
                     jogadores,
                     nome,
@@ -416,42 +573,99 @@ def gerenciar_partidas():
                     "time1"
                 )
 
+
+            # assistências time2
             for nome in parse_nomes(
-                dados.get("assistencia_time2")
+                dados.get(
+                    "assistencia_time2"
+                )
             ):
+
                 jogadores = atualizar_jogador(
                     jogadores,
                     nome,
                     "assistencias",
                     "time2"
                 )
+
 
             # recalcular total
-
-            jogadores["gols"] = (
-                pd.to_numeric(
-                    jogadores["gols"],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .astype(int)
-            )
-
-            jogadores["assistencias"] = (
-                pd.to_numeric(
-                    jogadores["assistencias"],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .astype(int)
-            )
-
             jogadores["total"] = (
+
                 jogadores["gols"]
+
                 +
+
                 jogadores["assistencias"]
+
+            )
+            # =====================
+            # ATUALIZAR GOLEIROS
+            # =====================
+
+            goleiros = pd.read_csv(
+                csv_goleiros,
+                keep_default_na=False
             )
 
+            defesas1 = pd.to_numeric(
+                dados.get("defesa_time1", 0),
+                errors="coerce"
+            )
+
+            defesas2 = pd.to_numeric(
+                dados.get("defesa_time2", 0),
+                errors="coerce"
+            )
+
+            defesas1 = 0 if pd.isna(defesas1) else int(defesas1)
+            defesas2 = 0 if pd.isna(defesas2) else int(defesas2)
+
+            goleiros = atualizar_goleiro(
+                goleiros,
+                dados.get("goleiro_time1"),
+                defesas1,
+                "time1"
+            )
+
+            goleiros = atualizar_goleiro(
+                goleiros,
+                dados.get("goleiro_time2"),
+                defesas2,
+                "time2"
+            )
+
+            goleiros["defesas"] = (
+                pd.to_numeric(
+                    goleiros["defesas"],
+                    errors="coerce"
+                )
+                .fillna(0)
+                .astype(int)
+            )
+
+            # =====================
+            # SALVAR TUDO
+            # =====================
+
+            partidas.to_csv(
+                csv_partidas,
+                index=False
+            )
+
+            jogadores.to_csv(
+                csv_jogadores,
+                index=False
+            )
+
+            goleiros.to_csv(
+                csv_goleiros,
+                index=False
+            )
+
+            return jsonify(
+                nova
+            ), 201
             # salvar
 
             partidas.to_csv(
@@ -489,6 +703,29 @@ def jogadores_df():
     df = pd.read_csv(csv_jogadores)
     df = df.where(pd.notnull(df), None)
     return jsonify(df.to_dict(orient="records"))
+
+
+@app.route("/api/top")
+def top():
+
+    df = pd.read_csv(
+        csv_jogadores
+    )
+
+    top = (
+        df
+        .sort_values(
+            "total",
+            ascending=False
+        )
+        .head(5)
+    )
+
+    return jsonify(
+        top.to_dict(
+            orient="records"
+        )
+    )
 
 
 if __name__ == "__main__":

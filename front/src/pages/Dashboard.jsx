@@ -5,7 +5,7 @@ import GraficoGols from "../components/GraficoGols"
 export default function Dashboard() {
   const [partidas, setPartidas] = useState([])
   const [jogadores, setJogadores] = useState([])
-
+  
   const [newData, setNewData] = useState("")
   const [newGoladores1, setNewGoladores1] = useState([])
   const [novoGolador1, setNovoGolador1] = useState({ nome: "", gols: 0 })
@@ -141,22 +141,49 @@ export default function Dashboard() {
   }, 0)
 
   // Ordenação das partidas para exibir os últimos resultados
-  const ultimasPartidas = [...partidas]
+  // 1. Filtra as partidas para ignorar repetições com os mesmos dados exatos
+  // 1. Filtra as partidas usando as propriedades exatas que vêm do seu backend (assistente_timeX)
+  const partidasSemRepetidos = partidas.filter((partida, index, self) => {
+    return index === self.findIndex((p) => 
+      p.data === partida.data &&
+      p.time1_placar === partida.time1_placar &&
+      p.time2_placar === partida.time2_placar &&
+      p.gol_time1 === partida.gol_time1 &&
+      p.gol_time2 === partida.gol_time2 &&
+      (p.assistente_time1 || p.assistencia_time1) === (partida.assistente_time1 || partida.assistencia_time1) &&
+      (p.assistente_time2 || p.assistencia_time2) === (partida.assistente_time2 || partida.assistencia_time2)
+    )
+  })
+
+  // 2. Ordena colocando as datas mais recentes de Verdade (pelo Objeto Date) no topo
+  const ultimasPartidas = [...partidasSemRepetidos]
     .sort((a, b) => {
       const parseDate = (dateStr) => {
-        if (!dateStr || typeof dateStr !== "string") return new Date(0)
-        const parts = dateStr.split('/')
-        if (parts.length !== 3) return new Date(0)
-        const [dia, mes, ano] = parts
-        return new Date(ano, mes - 1, dia)
-      }
-      const dateA = parseDate(a.data).getTime()
-      const dateB = parseDate(b.data).getTime()
-      if (dateA && dateB && dateA !== dateB) return dateB - dateA
-      return Number(b.ID || 0) - Number(a.ID || 0)
-    })
-    .slice(0, 5)
+        if (!dateStr || typeof dateStr !== "string") return new Date(0);
+        
+        const parts = dateStr.trim().split('/');
+        if (parts.length !== 3) return new Date(0);
+        
+        const dia = parseInt(parts[0], 10);
+        const mes = parseInt(parts[1], 10);
+        const ano = parseInt(parts[2], 10);
+        
+        return new Date(ano, mes - 1, dia);
+      };
 
+      const dateA = parseDate(a.data).getTime();
+      const dateB = parseDate(b.data).getTime();
+
+      // Se as datas forem diferentes, a mais recente (ex: Junho/2026) fica no topo
+      if (dateA !== dateB) {
+        return dateB - dateA;
+      }
+      
+      // Se a data for exatamente igual, o maior ID desempata no topo
+      return Number(b.ID || 0) - Number(a.ID || 0);
+    })
+    .slice(0, 5);
+    
   const topJogadores = [...jogadores]
     .sort((a, b) =>
       Number(b.total || 0) - Number(a.total || 0) ||

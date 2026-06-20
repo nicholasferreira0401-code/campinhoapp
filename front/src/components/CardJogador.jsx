@@ -3,6 +3,7 @@ import React from 'react';
 function CardJogador({
   nome,
   time,
+  posicao,
   gols,
   assistencias,
   total
@@ -20,9 +21,11 @@ function CardJogador({
   const classeTime = time 
     ? time.toLowerCase().replace(/\s+/g, '-') 
     : 'sem-time';
+  
+  const top = posicao <= 3 ? `top-${posicao}`:"";
 
   return (
-    <div className={`card ${classeTime}`}>
+    <div className={`card ${classeTime} ${top}`}>
       <h2>⚽ {nome || 'Jogador Anônimo'}</h2>
       <div className="card-detalhes">
         <p><strong>Time:</strong> {time || 'Não definido'}</p>
