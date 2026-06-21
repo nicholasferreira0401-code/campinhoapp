@@ -582,7 +582,7 @@ function carregarJogadores() {
         </div>
       </section>
 
-      {/* <GraficoGols partidas={partidas} /> */}
+      <GraficoGols partidas={partidas} /> 
     </div>
   )
 }

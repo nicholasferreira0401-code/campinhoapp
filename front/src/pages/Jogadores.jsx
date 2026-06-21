@@ -45,7 +45,7 @@ function Jogadores() {
 
       const dadosJogadores =
         await respostaJogadores.json();
-console.log("API jogadores:", dadosJogadores);
+
       setJogadores(
 
         dadosJogadores.sort(
@@ -73,9 +73,7 @@ console.log("API jogadores:", dadosJogadores);
       const dadosGoleiros =
 
         await respostaGoleiros.json();
-        
-console.log("API goleiros:", dadosGoleiros);
-
+  
       setGoleiros(
 
         dadosGoleiros.sort(
@@ -179,73 +177,58 @@ console.log("API goleiros:", dadosGoleiros);
     );
 
 
-console.log("Estado jogadores:", jogadores);
-console.log("Filtrados:", jogadoresFiltrados);
   return (
 
 <div className="pagina-jogadores">
+<div className="filtro-container">
 
-<select
+  <div className="select-wrapper">
+    <span>⚽</span>
 
-value={time}
+    <select
+      value={time}
+      onChange={(e)=>setTime(e.target.value)}
+    >
+      <option value="">
+        Todos
+      </option>
 
-onChange={
+      <option value="time1" class>
+        Time 1
+      </option>
 
-(e)=>
+      <option value="time2">
+        Time 2
+      </option>
+    </select>
+  </div>
 
-setTime(
+  <div className="busca-wrapper">
 
-e.target.value
+    <span className="icone">
+      🔎
+    </span>
 
-)
+    <input
+      type="text"
+      placeholder="Buscar jogador ou goleiro..."
+      value={busca}
+      onChange={(e)=>setBusca(e.target.value)}
+    />
 
-}
+  </div>
 
->
+  <button
+    className="btn-limpar"
+    onClick={()=>{
+      setBusca('');
+      setTime('');
+    }}
+  >
+    ↻ Limpar
+  </button>
 
-<option value="">
-
-Todos
-
-</option>
-
-<option value="time1">
-
-time1
-
-</option>
-
-<option value="time2">
-
-time2
-
-</option>
-
-</select>
-
-<input
-
-type="text"
-
-className="campo-busca"
-
-placeholder="Buscar jogador ou goleiro..."
-
-value={busca}
-
-onChange={
-
-(e)=>
-
-setBusca(
-
-e.target.value
-
-)
-
-}
-
-/>
+</div>
 
 <div className="lista-cards">
 
