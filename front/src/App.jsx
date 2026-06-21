@@ -10,7 +10,7 @@ import AddJogador from "./pages/AddJogador"
 import AddPartida from "./pages/AddPartida"
 
 function App() {
-
+  
   return (
     <BrowserRouter>
       <div className="app-layout">

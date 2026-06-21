@@ -79,8 +79,8 @@ function carregarJogadores() {
       time2_placar: parseInt(placar2) || 0,
       gol_time1: joinRepeatedNames(newGoladores1, "gols"),
       gol_time2: joinRepeatedNames(newGoladores2, "gols"),
-      assistente_time1: joinRepeatedNames(newAssist1, "assists"),
-      assistente_time2: joinRepeatedNames(newAssist2, "assists"),
+      assistencia_time1: joinRepeatedNames(newAssist1, "assists"),
+      assistencia_time2: joinRepeatedNames(newAssist2, "assists"),
       goleiro_time1: newGoleiro1 || "",
       defesa_time1: parseInt(newDefesa1) || 0,
       goleiro_time2: newGoleiro2 || "",
@@ -205,10 +205,6 @@ function carregarJogadores() {
       Number(b.gols || 0) - Number(a.gols || 0)
     )
     .slice(0, 5)
-console.log("partidas:", partidas)
-console.log("jogadores:", jogadores)
-console.log("ultimasPartidas:", ultimasPartidas)
-console.log("topJogadores:", topJogadores)
   return (
     <div className="dashboard">
       <div className="dashboard-header">

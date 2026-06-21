@@ -25,7 +25,7 @@ function CardJogador({
   const top = posicao <= 3 ? `top-${posicao}`:"";
 
   return (
-    <div className={`card ${classeTime} ${top}`}>
+    <div className={`card ${classeTime}`}>
       <h2>⚽ {nome || 'Jogador Anônimo'}</h2>
       <div className="card-detalhes">
         <p><strong>Time:</strong> {time || 'Não definido'}</p>

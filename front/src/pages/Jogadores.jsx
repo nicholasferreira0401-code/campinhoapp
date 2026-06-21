@@ -45,7 +45,7 @@ function Jogadores() {
 
       const dadosJogadores =
         await respostaJogadores.json();
-
+console.log("API jogadores:", dadosJogadores);
       setJogadores(
 
         dadosJogadores.sort(
@@ -73,6 +73,8 @@ function Jogadores() {
       const dadosGoleiros =
 
         await respostaGoleiros.json();
+        
+console.log("API goleiros:", dadosGoleiros);
 
       setGoleiros(
 
@@ -114,7 +116,7 @@ function Jogadores() {
 
         (
 
-          j.jogador
+          j.nome
 
           ?.toLowerCase()
 
@@ -150,7 +152,7 @@ function Jogadores() {
 
         (
 
-          g.jogador
+          g.nome
 
           ?.toLowerCase()
 
@@ -177,7 +179,8 @@ function Jogadores() {
     );
 
 
-
+console.log("Estado jogadores:", jogadores);
+console.log("Filtrados:", jogadoresFiltrados);
   return (
 
 <div className="pagina-jogadores">
@@ -272,7 +275,7 @@ index
 
 key={`j-${index}`}
 
-nome={jogador.jogador}
+nome={jogador.nome}
 
 time={jogador.time}
 
@@ -318,7 +321,7 @@ index
 
 key={`g-${index}`}
 
-nome={goleiro.jogador}
+nome={goleiro.nome}
 
 time={goleiro.time}
 
