@@ -1,7 +1,9 @@
 from ..database import db
 
 
-class Goleiro(db.Model):
+class Campeonato(db.Model):
+
+    __tablename__ = "campeonatos"
 
     id = db.Column(
         db.Integer,
@@ -12,11 +14,13 @@ class Goleiro(db.Model):
         db.String(100)
     )
 
-    time = db.Column(
-        db.String(100)
-    )
+    usuario_id = db.Column(
 
-    defesas = db.Column(
         db.Integer,
-        default=0
+
+        db.ForeignKey(
+            "usuario.id"
+        ),
+
+        nullable=False
     )

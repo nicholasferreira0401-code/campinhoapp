@@ -2,9 +2,9 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 
-from database import db
+from ..database import db
 
-from models.jogador import Jogador
+from ..models.jogador import Jogador
 
 
 jogadores_bp = Blueprint(

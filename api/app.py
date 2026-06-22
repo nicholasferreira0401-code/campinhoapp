@@ -1,19 +1,21 @@
 from flask import Flask
 from flask_cors import CORS
 
-from database import db
+from .database import db
 
 
-# importar modelos
-from models.jogador import Jogador
-from models.goleiro import Goleiro
-from models.partida import Partida
+# modelos
+from .models.jogador import Jogador
+from .models.goleiro import Goleiro
+from .models.partida import Partida
+from .models.Usuario import Usuario
+from .models.campeonato import Campeonato
 
-
-# importar rotas
-from routes.jogadores import jogadores_bp
-from routes.goleiros import goleiros_bp
-from routes.partidas import partidas_bp
+# rotas
+from .routes.jogadores import jogadores_bp
+from .routes.goleiros import goleiros_bp
+from .routes.partidas import partidas_bp
+from .routes.auth import auth_bp
 
 
 app = Flask(__name__)
@@ -24,16 +26,22 @@ app = Flask(__name__)
 # =====================
 
 app.config[
-    "SQLALCHEMY_DATABASE_URI"
+"SQLALCHEMY_DATABASE_URI"
 ] = "sqlite:///campinho.db"
 
 app.config[
-    "SQLALCHEMY_TRACK_MODIFICATIONS"
+"SQLALCHEMY_TRACK_MODIFICATIONS"
 ] = False
+
+# JWT (vamos usar depois)
+
+app.config[
+"JWT_SECRET_KEY"
+] = "campinho-secret"
 
 
 # =====================
-# INICIAR EXTENSÕES
+# EXTENSÕES
 # =====================
 
 db.init_app(app)
@@ -41,32 +49,37 @@ db.init_app(app)
 CORS(
     app,
     resources={
-        r"/api/*": {
-            "origins": "*"
+        r"/*": {
+            "origins": [
+                "http://localhost:5173"
+            ]
         }
     }
 )
 
 
 # =====================
-# REGISTRAR ROTAS
+# ROTAS
 # =====================
 
 app.register_blueprint(
-    jogadores_bp
+jogadores_bp
 )
 
 app.register_blueprint(
-    goleiros_bp
+goleiros_bp
 )
 
 app.register_blueprint(
-    partidas_bp
+partidas_bp
 )
+
+app.register_blueprint(
+auth_bp)
 
 
 # =====================
-# CRIAR BANCO
+# BANCO
 # =====================
 
 with app.app_context():
@@ -78,14 +91,8 @@ with app.app_context():
 # START
 # =====================
 
-if __name__ == "__main__":
+if __name__=="__main__":
 
     app.run(
-
-        host="127.0.0.1",
-
-        port=5000,
-
         debug=True
-
     )

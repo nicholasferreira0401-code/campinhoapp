@@ -1,7 +1,5 @@
 from ..database import db
-
-
-class Goleiro(db.Model):
+class Usuario(db.Model):
 
     id = db.Column(
         db.Integer,
@@ -12,11 +10,11 @@ class Goleiro(db.Model):
         db.String(100)
     )
 
-    time = db.Column(
-        db.String(100)
+    email = db.Column(
+        db.String(120),
+        unique=True
     )
 
-    defesas = db.Column(
-        db.Integer,
-        default=0
+    senha = db.Column(
+        db.String(255)
     )

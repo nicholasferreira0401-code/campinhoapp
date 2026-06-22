@@ -2,11 +2,11 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 
-from database import db
+from ..database import db
 
-from models.partida import Partida
-from models.jogador import Jogador
-from models.goleiro import Goleiro
+from ..models.partida import Partida
+from ..models.jogador import Jogador
+from ..models.goleiro import Goleiro
 
 import re
 
