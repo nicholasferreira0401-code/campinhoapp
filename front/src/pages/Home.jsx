@@ -57,14 +57,13 @@ return(
 onClick={()=>
 
 navigate(
-"/campeonato/meus"
+"/meus-campeonatos"
+
 )
 
 }
 >
-
 🏆 Meus Campeonatos
-
 </button>
 
 

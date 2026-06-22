@@ -83,6 +83,8 @@ useLocation()
 
 const paginasSemNavbar=[
 
+"/",
+
 "/login",
 
 "/cadastro"
