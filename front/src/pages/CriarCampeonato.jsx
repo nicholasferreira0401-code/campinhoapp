@@ -1,56 +1,57 @@
-import {
-useState
-}
-from "react"
-
-import {
-useNavigate
-}
-from "react-router-dom"
-
+import { useState } from "react"
 import "../styles/CriarCampeonato.css"
-
 
 function CriarCampeonato(){
 
-const navigate =
-useNavigate()
+const [dados,setDados]=useState({
 
+nome:"",
+esporte:"Futebol",
+descricao:"",
 
-const[
-nome,
-setNome
-]=
-useState("")
+privado:false
 
+})
 
-const[
-descricao,
-setDescricao
-]=
-useState("")
+function alterar(e){
 
+const{
 
-async function criar(){
+name,
+value,
+type,
+checked
 
-if(
-!nome
-){
+}=e.target
 
-alert(
-"Digite um nome"
-)
+setDados({
 
-return
+...dados,
+
+[name]:
+
+type==="checkbox"
+
+? checked
+
+: value
+
+})
 
 }
 
 
+async function criar(e){
+
+e.preventDefault()
+
 try{
+
+const res=
 
 await fetch(
 
-"http://127.0.0.1:5000/api/campeonatos",
+"http://127.0.0.1:5000/campeonatos",
 
 {
 
@@ -59,107 +60,160 @@ method:"POST",
 headers:{
 
 "Content-Type":
-
 "application/json"
 
 },
 
 body:
 
-JSON.stringify({
+JSON.stringify(
 
-nome,
+dados
 
-descricao
-
-})
+)
 
 }
 
 )
 
+const json=
 
-navigate("/")
-
-}
-
-catch{
+await res.json()
 
 alert(
+
+"Campeonato criado"
+
+)
+
+console.log(
+
+json
+
+)
+
+}catch{
+
+alert(
+
 "Erro ao criar"
+
 )
 
 }
 
 }
-
 
 return(
 
-<div className="criar">
+<div className="criar-page">
 
-<div className="card">
+<form
+onSubmit={criar}
+className="criar-box"
+>
 
 <h1>
 
-🏆 Criar Campeonato
+Criar Campeonato
 
 </h1>
 
 
 <input
 
+name="nome"
+
 placeholder="Nome"
 
-value={nome}
+value={dados.nome}
 
-onChange={(e)=>
-
-setNome(
-e.target.value
-)
-
-}
+onChange={alterar}
 
 />
+
+
+<select
+
+name="esporte"
+
+value={dados.esporte}
+
+onChange={alterar}
+
+>
+
+<option>
+
+Futebol
+
+</option>
+
+<option>
+
+Vôlei
+
+</option>
+
+<option>
+
+Tênis
+
+</option>
+
+<option>
+
+Basquete
+
+</option>
+
+</select>
 
 
 <textarea
 
-placeholder=
+name="descricao"
 
-"Descrição"
+placeholder="Descrição"
 
-value={descricao}
+value={dados.descricao}
 
-onChange={(e)=>
-
-setDescricao(
-e.target.value
-)
-
-}
+onChange={alterar}
 
 />
 
 
-<button
+<label>
 
-onClick={criar}
+<input
 
->
+type="checkbox"
+
+name="privado"
+
+checked={dados.privado}
+
+onChange={alterar}
+
+/>
+
+Privado
+
+</label>
+
+
+<button>
 
 Criar
 
 </button>
 
-</div>
+</form>
 
 </div>
 
 )
 
 }
-
 
 export default CriarCampeonato

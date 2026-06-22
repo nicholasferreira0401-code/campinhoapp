@@ -1,4 +1,4 @@
-.criar{
+.criar-page{
 
 display:flex;
 
@@ -10,83 +10,84 @@ min-height:100vh;
 
 background:
 
-#07142e;
+linear-gradient(
+180deg,
+#0a2150,
+#0b327f
+);
 
 }
 
 
-.card{
+.criar-box{
 
-width:700px;
+width:600px;
 
-padding:50px;
+padding:40px;
 
-background:
+border-radius:20px;
 
-#0f2148;
-
-border-radius:30px;
+background:#0d2558;
 
 display:flex;
 
 flex-direction:column;
 
-gap:25px;
+gap:18px;
 
 }
 
 
-.card h1{
+.criar-box h1{
 
 color:white;
 
+margin-bottom:20px;
+
 }
 
 
-.card input,
-.card textarea{
+.criar-box input,
+.criar-box select,
+.criar-box textarea{
 
-padding:20px;
+height:60px;
+
+padding:18px;
 
 border:none;
 
-border-radius:20px;
+border-radius:14px;
 
-background:
-
-#17326b;
+background:#14397f;
 
 color:white;
-
-font-size:18px;
 
 }
 
 
-.card textarea{
+.criar-box textarea{
 
-height:180px;
+height:150px;
 
 resize:none;
 
 }
 
 
-.card button{
+.criar-box button{
 
-height:65px;
+height:60px;
 
 border:none;
 
-border-radius:18px;
+border-radius:14px;
 
-background:
-
-#3567ff;
+background:#2563eb;
 
 color:white;
 
-font-size:20px;
+font-size:18px;
 
 cursor:pointer;
 

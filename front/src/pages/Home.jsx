@@ -12,52 +12,17 @@ const navigate =
 useNavigate();
 
 
-const campeonatos=[
+const destaques=[
 
-{
-id:1,
-nome:"Brasileirão"
-},
-
-{
-id:2,
-nome:"Premier League"
-},
-
-{
-id:3,
-nome:"La Liga"
-},
-
-{
-id:4,
-nome:"Copa do Mundo"
-},
-
-{
-id:5,
-nome:"Campeonato Vôlei"
-},
-
-{
-id:6,
-nome:"Interclasse"
-},
-
-{
-id:7,
-nome:"João"
-},
-
-{
-id:8,
-nome:"Maria"
-},
-
-{
-id:9,
-nome:"Tênis Campeonatinho"
-}
+"Brasileirão",
+"Premier League",
+"La Liga",
+"Copa do Mundo",
+"Campeonato Vôlei",
+"Interclasse",
+"João",
+"Maria",
+"Tênis Campeonatinho"
 
 ];
 
@@ -87,11 +52,21 @@ return(
 
 </button>
 
-<button>
+
+<button
+onClick={()=>
+
+navigate(
+"/campeonato/meus"
+)
+
+}
+>
 
 🏆 Meus Campeonatos
 
 </button>
+
 
 <button>
 
@@ -99,24 +74,22 @@ return(
 
 </button>
 
+
 <button>
 
 👥 Amigos
 
 </button>
 
-<button
 
+<button
 onClick={()=>
 
 navigate(
-
 "/criar"
-
 )
 
 }
-
 >
 
 ➕ Criar
@@ -126,6 +99,7 @@ navigate(
 </nav>
 
 </aside>
+
 
 
 <section className="conteudo">
@@ -150,33 +124,45 @@ Limpar
 
 
 
+<div className="secao">
+
+<h1>
+
+Explorar
+
+</h1>
+
+<p>
+
+Campeonatos populares e usuários em destaque
+
+</p>
+
+</div>
+
+
+
 <div className="grid">
 
 {
 
-campeonatos.map(
+destaques.map(
 
-(c)=>(
+(nome,index)=>(
 
 <div
 
 className="card"
 
-key={c.id}
-
-onClick={()=>
-
-navigate(
-
-`/campeonato/${c.id}`
-
-)
-
-}
+key={index}
 
 >
 
-{c.nome}
+<h3>
+
+{nome}
+
+</h3>
 
 </div>
 

@@ -9,10 +9,8 @@ from "react-router-dom"
 
 import "./App.css"
 
-
 // COMPONENTES
 import Navbar from "./components/Navbar"
-
 
 // PÁGINAS
 import Login from "./pages/Login"
@@ -36,20 +34,19 @@ function PrivateRoute({
 
 children,
 
-allowGuest = true
+allowGuest=true
 
-}) {
+}){
 
-const token =
+const token=
 localStorage.getItem(
 "token"
 )
 
-const guest =
+const guest=
 localStorage.getItem(
 "guest"
 )
-
 
 if(
 
@@ -64,17 +61,13 @@ if(
 return(
 
 <Navigate
-
 to="/login"
-
 replace
-
 />
 
 )
 
 }
-
 
 return children
 
@@ -84,22 +77,20 @@ return children
 
 function Layout(){
 
-const location =
+const location=
 useLocation()
 
 
-const paginasSemNavbar = [
+const paginasSemNavbar=[
 
 "/login",
 
-"/cadastro",
-
-"/"
+"/cadastro"
 
 ]
 
 
-const mostrarNavbar =
+const mostrarNavbar=
 
 !paginasSemNavbar.includes(
 
@@ -122,29 +113,20 @@ mostrarNavbar
 
 }
 
-
 <main className="page-content">
 
 <Routes>
 
-
 {/* LOGIN */}
 
 <Route
-
 path="/login"
-
 element={<Login/>}
-
 />
 
-
 <Route
-
 path="/cadastro"
-
 element={<Cadastro/>}
-
 />
 
 
@@ -152,164 +134,107 @@ element={<Cadastro/>}
 {/* HOME */}
 
 <Route
-
 path="/"
-
 element={
-
 <PrivateRoute>
-
 <Home/>
-
 </PrivateRoute>
-
 }
-
 />
 
 
 
-{/* CRIAR CAMPEONATO */}
+{/* MEUS CAMPEONATOS */}
 
 <Route
-
-path="/criar"
-
+path="/meus-campeonatos"
 element={
-
-<PrivateRoute
-
-allowGuest={false}
-
->
-
-<CriarCampeonato/>
-
-</PrivateRoute>
-
-}
-
-/>
-
-
-
-{/* DASHBOARD DO CAMPEONATO */}
-
-<Route
-
-path="/campeonato/:id"
-
-element={
-
 <PrivateRoute>
-
 <Dashboard/>
-
 </PrivateRoute>
-
 }
+/>
 
+
+
+{/* CRIAR */}
+
+<Route
+path="/criar"
+element={
+<PrivateRoute
+allowGuest={false}
+>
+<CriarCampeonato/>
+</PrivateRoute>
+}
+/>
+
+
+
+{/* CAMPEONATO ESPECÍFICO */}
+
+<Route
+path="/campeonato/:id"
+element={
+<PrivateRoute>
+<Dashboard/>
+</PrivateRoute>
+}
 />
 
 
 
 <Route
-
 path="/jogadores"
-
 element={
-
 <PrivateRoute>
-
 <Jogadores/>
-
 </PrivateRoute>
-
 }
-
 />
 
-
 <Route
-
 path="/partidas"
-
 element={
-
 <PrivateRoute>
-
 <Partidas/>
-
 </PrivateRoute>
-
 }
-
 />
 
-
-
 <Route
-
 path="/add-jogador"
-
 element={
-
 <PrivateRoute
-
 allowGuest={false}
-
 >
-
 <AddJogador/>
-
 </PrivateRoute>
-
 }
-
 />
 
-
-
 <Route
-
 path="/add-partida"
-
 element={
-
 <PrivateRoute
-
 allowGuest={false}
-
 >
-
 <AddPartida/>
-
 </PrivateRoute>
-
 }
-
 />
-
 
 
 <Route
-
 path="*"
-
 element={
-
 <Navigate
-
 to="/"
-
 replace
-
 />
-
 }
-
 />
-
 
 </Routes>
 

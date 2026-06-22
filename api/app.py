@@ -16,7 +16,7 @@ from .routes.jogadores import jogadores_bp
 from .routes.goleiros import goleiros_bp
 from .routes.partidas import partidas_bp
 from .routes.auth import auth_bp
-
+from .routes.campeonatos import campeonato_bp
 
 app = Flask(__name__)
 
@@ -77,6 +77,9 @@ partidas_bp
 app.register_blueprint(
 auth_bp)
 
+app.register_blueprint(
+campeonato_bp
+)
 
 # =====================
 # BANCO
