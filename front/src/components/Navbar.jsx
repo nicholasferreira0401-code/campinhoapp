@@ -18,9 +18,12 @@ export default function Navbar() {
       </div>
 
       <nav className="nav-links">
-        <Link to="/" className={isLinkAtivo("/")}>
+        <Link
+          to="/meus-campeonatos"
+          className={isLinkAtivo("/meus-campeonatos")}
+          >
           Dashboard
-        </Link>
+       </Link>
         <Link to="/partidas" className={isLinkAtivo("/partidas")}>
           Partidas
         </Link>

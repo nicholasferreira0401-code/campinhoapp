@@ -205,6 +205,7 @@ function carregarJogadores() {
       Number(b.gols || 0) - Number(a.gols || 0)
     )
     .slice(0, 5)
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -216,6 +217,7 @@ function carregarJogadores() {
           </p>
         </div>
         <div className="dashboard-actions">
+          <Link to="/" className="button-secondary">Home</Link>
           <Link to="/add-partida" className="button-primary">
             Registrar partida
           </Link>
@@ -582,7 +584,7 @@ function carregarJogadores() {
         </div>
       </section>
 
-      <GraficoGols partidas={partidas} /> 
+       <GraficoGols partidas={partidas} /> 
     </div>
   )
 }

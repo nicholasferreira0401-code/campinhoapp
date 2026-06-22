@@ -17,6 +17,8 @@ import Login from "./pages/Login"
 import Cadastro from "./pages/Cadastro"
 
 import Home from "./pages/Home"
+import MeusCampeonatos
+from "./pages/MeusCampeonatos"
 
 import Dashboard from "./pages/Dashboard"
 
@@ -75,42 +77,43 @@ return children
 
 
 
+
 function Layout(){
 
-const location=
+const location =
 useLocation()
 
-
-const paginasSemNavbar=[
-
-"/",
+const paginasSemNavbar = [
 
 "/login",
-
 "/cadastro"
 
 ]
 
-
-const mostrarNavbar=
-
+const mostrarNavbar =
 !paginasSemNavbar.includes(
-
 location.pathname
-
 )
 
+const mostrarLayoutCompleto =
+location.pathname !== "/"
 
 return(
+
+<>
+
+{
+
+mostrarLayoutCompleto
+
+?
 
 <div className="app-layout">
 
 {
 
 mostrarNavbar
-
 &&
-
 <Navbar/>
 
 }
@@ -119,7 +122,14 @@ mostrarNavbar
 
 <Routes>
 
-{/* LOGIN */}
+<Route
+path="/"
+element={
+<PrivateRoute>
+<Home/>
+</PrivateRoute>
+}
+/>
 
 <Route
 path="/login"
@@ -131,50 +141,23 @@ path="/cadastro"
 element={<Cadastro/>}
 />
 
-
-
-{/* HOME */}
-
-<Route
-path="/"
-element={
-<PrivateRoute>
-<Home/>
-</PrivateRoute>
-}
-/>
-
-
-
-{/* MEUS CAMPEONATOS */}
-
 <Route
 path="/meus-campeonatos"
 element={
 <PrivateRoute>
-<Dashboard/>
+<MeusCampeonatos/>
 </PrivateRoute>
 }
 />
-
-
-
-{/* CRIAR */}
 
 <Route
 path="/criar"
 element={
-<PrivateRoute
-allowGuest={false}
->
+<PrivateRoute allowGuest={false}>
 <CriarCampeonato/>
 </PrivateRoute>
 }
 />
-
-
-
-{/* CAMPEONATO ESPECÍFICO */}
 
 <Route
 path="/campeonato/:id"
@@ -184,8 +167,6 @@ element={
 </PrivateRoute>
 }
 />
-
-
 
 <Route
 path="/jogadores"
@@ -208,9 +189,7 @@ element={
 <Route
 path="/add-jogador"
 element={
-<PrivateRoute
-allowGuest={false}
->
+<PrivateRoute allowGuest={false}>
 <AddJogador/>
 </PrivateRoute>
 }
@@ -219,22 +198,9 @@ allowGuest={false}
 <Route
 path="/add-partida"
 element={
-<PrivateRoute
-allowGuest={false}
->
+<PrivateRoute allowGuest={false}>
 <AddPartida/>
 </PrivateRoute>
-}
-/>
-
-
-<Route
-path="*"
-element={
-<Navigate
-to="/"
-replace
-/>
 }
 />
 
@@ -243,6 +209,25 @@ replace
 </main>
 
 </div>
+
+:
+
+<Routes>
+
+<Route
+path="/"
+element={
+<PrivateRoute>
+<Home/>
+</PrivateRoute>
+}
+/>
+
+</Routes>
+
+}
+
+</>
 
 )
 

@@ -193,7 +193,7 @@ function Jogadores() {
         Todos
       </option>
 
-      <option value="time1" class>
+      <option value="time1">
         Time 1
       </option>
 
